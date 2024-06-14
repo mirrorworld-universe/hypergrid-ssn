@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package hypergridssn.hypergridssn;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+import "hypergridssn/hypergridssn/params.proto";
+import "hypergridssn/hypergridssn/solana_account.proto";
+import "hypergridssn/hypergridssn/grid_block_fee.proto";
+import "hypergridssn/hypergridssn/hypergrid_node.proto";
+import "hypergridssn/hypergridssn/fee_settlement_bill.proto";
+
+option go_package = "hypergrid-ssn/x/hypergridssn/types";
+
+// GenesisState defines the hypergridssn module's genesis state.
+message GenesisState {
+  
+  // params defines all the parameters of the module.
+           Params            params                 = 1 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
+  repeated SolanaAccount     solanaAccountList      = 2 [(gogoproto.nullable) = false] ;
+  repeated GridBlockFee      gridBlockFeeList       = 5 [(gogoproto.nullable) = false] ;
+           uint64            gridBlockFeeCount      = 6;
+  repeated HypergridNode     hypergridNodeList      = 7 [(gogoproto.nullable) = false] ;
+  repeated FeeSettlementBill feeSettlementBillList  = 8 [(gogoproto.nullable) = false] ;
+           uint64            feeSettlementBillCount = 9;
+}
+

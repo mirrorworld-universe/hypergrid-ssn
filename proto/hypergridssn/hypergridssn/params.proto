@@ -1,0 +1,15 @@
+syntax = "proto3";
+package hypergridssn.hypergridssn;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "hypergrid-ssn/x/hypergridssn/types";
+
+// Params defines the parameters for the module.
+message Params {
+  option (amino.name) = "hypergridssn/x/hypergridssn/Params";
+  option (gogoproto.equal) = true;
+
+  
+}

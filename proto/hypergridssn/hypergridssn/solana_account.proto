@@ -1,0 +1,14 @@
+syntax = "proto3";
+package hypergridssn.hypergridssn;
+
+option go_package = "hypergrid-ssn/x/hypergridssn/types";
+
+message SolanaAccount {
+  string address = 1; 
+  string version = 2; 
+  string source = 3;
+  string slot = 4; 
+  string value = 5; 
+  string creator = 6;
+}
+
