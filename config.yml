@@ -1,0 +1,19 @@
+version: 1
+validation: sovereign
+accounts: 
+- name: alice
+  coins:
+  - 200000000hsol
+- name: bob
+  coins:
+  - 100000000hsol
+client:
+  openapi:
+    path: docs/static/openapi.yml
+faucet:
+  name: bob
+  coins:
+  - 100000hsol
+validators:
+- name: alice
+  bonded: 100000000hsol

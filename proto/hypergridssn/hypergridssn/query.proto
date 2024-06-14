@@ -1,0 +1,144 @@
+syntax = "proto3";
+
+package hypergridssn.hypergridssn;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "hypergridssn/hypergridssn/params.proto";
+import "hypergridssn/hypergridssn/solana_account.proto";
+import "hypergridssn/hypergridssn/grid_block_fee.proto";
+import "hypergridssn/hypergridssn/hypergrid_node.proto";
+import "hypergridssn/hypergridssn/fee_settlement_bill.proto";
+
+option go_package = "hypergrid-ssn/x/hypergridssn/types";
+
+// Query defines the gRPC querier service.
+service Query {
+  
+  // Parameters queries the parameters of the module.
+  rpc Params (QueryParamsRequest) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/hypergrid-ssn/hypergridssn/params";
+  
+  }
+  
+  // Queries a list of SolanaAccount items.
+  rpc SolanaAccount    (QueryGetSolanaAccountRequest) returns (QueryGetSolanaAccountResponse) {
+    option (google.api.http).get = "/hypergrid-ssn/hypergridssn/solana_account/{address}/{version}";
+  
+  }
+  rpc SolanaAccountAll (QueryAllSolanaAccountRequest) returns (QueryAllSolanaAccountResponse) {
+    option (google.api.http).get = "/hypergrid-ssn/hypergridssn/solana_account";
+  
+  }
+  
+  // Queries a list of GridBlockFee items.
+  rpc GridBlockFee    (QueryGetGridBlockFeeRequest) returns (QueryGetGridBlockFeeResponse) {
+    option (google.api.http).get = "/hypergrid-ssn/hypergridssn/grid_block_fee/{id}";
+  
+  }
+  rpc GridBlockFeeAll (QueryAllGridBlockFeeRequest) returns (QueryAllGridBlockFeeResponse) {
+    option (google.api.http).get = "/hypergrid-ssn/hypergridssn/grid_block_fee";
+  
+  }
+  
+  // Queries a list of HypergridNode items.
+  rpc HypergridNode    (QueryGetHypergridNodeRequest) returns (QueryGetHypergridNodeResponse) {
+    option (google.api.http).get = "/hypergrid-ssn/hypergridssn/hypergrid_node/{pubkey}";
+  
+  }
+  rpc HypergridNodeAll (QueryAllHypergridNodeRequest) returns (QueryAllHypergridNodeResponse) {
+    option (google.api.http).get = "/hypergrid-ssn/hypergridssn/hypergrid_node";
+  
+  }
+  
+  // Queries a list of FeeSettlementBill items.
+  rpc FeeSettlementBill    (QueryGetFeeSettlementBillRequest) returns (QueryGetFeeSettlementBillResponse) {
+    option (google.api.http).get = "/hypergrid-ssn/hypergridssn/fee_settlement_bill/{id}";
+  
+  }
+  rpc FeeSettlementBillAll (QueryAllFeeSettlementBillRequest) returns (QueryAllFeeSettlementBillResponse) {
+    option (google.api.http).get = "/hypergrid-ssn/hypergridssn/fee_settlement_bill";
+  
+  }
+}
+// QueryParamsRequest is request type for the Query/Params RPC method.
+message QueryParamsRequest {}
+
+// QueryParamsResponse is response type for the Query/Params RPC method.
+message QueryParamsResponse {
+  
+  // params holds all the parameters of this module.
+  Params params = 1 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
+}
+
+message QueryGetSolanaAccountRequest {
+  string address = 1;
+  string version = 2;
+}
+
+message QueryGetSolanaAccountResponse {
+  SolanaAccount solanaAccount = 1 [(gogoproto.nullable) = false];
+}
+
+message QueryAllSolanaAccountRequest {
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+message QueryAllSolanaAccountResponse {
+  repeated SolanaAccount                          solanaAccount = 1 [(gogoproto.nullable) = false];
+           cosmos.base.query.v1beta1.PageResponse pagination    = 2;
+}
+
+message QueryGetGridBlockFeeRequest {
+  uint64 id = 1;
+}
+
+message QueryGetGridBlockFeeResponse {
+  GridBlockFee GridBlockFee = 1 [(gogoproto.nullable) = false];
+}
+
+message QueryAllGridBlockFeeRequest {
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+message QueryAllGridBlockFeeResponse {
+  repeated GridBlockFee                           GridBlockFee = 1 [(gogoproto.nullable) = false];
+           cosmos.base.query.v1beta1.PageResponse pagination   = 2;
+}
+
+message QueryGetHypergridNodeRequest {
+  string pubkey = 1;
+}
+
+message QueryGetHypergridNodeResponse {
+  HypergridNode hypergridNode = 1 [(gogoproto.nullable) = false];
+}
+
+message QueryAllHypergridNodeRequest {
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+message QueryAllHypergridNodeResponse {
+  repeated HypergridNode                          hypergridNode = 1 [(gogoproto.nullable) = false];
+           cosmos.base.query.v1beta1.PageResponse pagination    = 2;
+}
+
+message QueryGetFeeSettlementBillRequest {
+  uint64 id = 1;
+}
+
+message QueryGetFeeSettlementBillResponse {
+  FeeSettlementBill FeeSettlementBill = 1 [(gogoproto.nullable) = false];
+}
+
+message QueryAllFeeSettlementBillRequest {
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+message QueryAllFeeSettlementBillResponse {
+  repeated FeeSettlementBill                      FeeSettlementBill = 1 [(gogoproto.nullable) = false];
+           cosmos.base.query.v1beta1.PageResponse pagination        = 2;
+}
+

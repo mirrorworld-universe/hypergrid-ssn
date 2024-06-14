@@ -1,0 +1,14 @@
+syntax = "proto3";
+package hypergridssn.hypergridssn;
+
+option go_package = "hypergrid-ssn/x/hypergridssn/types";
+
+message GridBlockFee {
+  uint64 id = 1;
+  string grid = 2; 
+  string slot = 3; 
+  string blockhash = 4; 
+  int32 blocktime = 5; 
+  string fee = 6; 
+  string creator = 7;
+}

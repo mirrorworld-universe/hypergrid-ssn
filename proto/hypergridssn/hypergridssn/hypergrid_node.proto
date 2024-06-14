@@ -1,0 +1,14 @@
+syntax = "proto3";
+package hypergridssn.hypergridssn;
+
+option go_package = "hypergrid-ssn/x/hypergridssn/types";
+
+message HypergridNode {
+  string pubkey = 1; 
+  string name = 2; 
+  string rpc = 3; 
+  int32 role = 4; 
+  int32 starttime = 5; 
+  string creator = 6;
+}
+

@@ -1,0 +1,13 @@
+syntax = "proto3";
+package hypergridssn.hypergridssn;
+
+option go_package = "hypergrid-ssn/x/hypergridssn/types";
+
+message FeeSettlementBill {
+  uint64 id = 1;
+  uint64 fromId = 2; 
+  uint64 endId = 3; 
+  string bill = 4; 
+  int32 status = 5; 
+  string creator = 6;
+}
