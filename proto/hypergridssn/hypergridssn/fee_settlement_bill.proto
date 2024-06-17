@@ -5,9 +5,9 @@ option go_package = "hypergrid-ssn/x/hypergridssn/types";
 
 message FeeSettlementBill {
   uint64 id = 1;
-  uint64 fromId = 2; 
-  uint64 endId = 3; 
-  string bill = 4; 
+  uint64 fromId = 2; // from id in GridBlockFee
+  uint64 endId = 3; // end id in GridBlockFee
+  string bill = 4; // json [{"grid": "grid111","profit":100}, {"grid": "grid222","profit":200}]
   int32 status = 5; 
   string creator = 6;
 }

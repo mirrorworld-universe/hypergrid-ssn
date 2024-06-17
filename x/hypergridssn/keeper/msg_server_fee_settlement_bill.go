@@ -59,6 +59,8 @@ func (k msgServer) CreateFeeSettlementBill(goCtx context.Context, msg *types.Msg
 		feeSettlementBill,
 	)
 
+	//todo: call sonic grid to settle the fee
+
 	return &types.MsgCreateFeeSettlementBillResponse{
 		Id: id,
 	}, nil
