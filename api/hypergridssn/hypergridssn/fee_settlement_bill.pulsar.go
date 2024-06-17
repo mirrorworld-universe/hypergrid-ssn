@@ -707,9 +707,9 @@ type FeeSettlementBill struct {
 	unknownFields protoimpl.UnknownFields
 
 	Id      uint64 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	FromId  uint64 `protobuf:"varint,2,opt,name=fromId,proto3" json:"fromId,omitempty"`
-	EndId   uint64 `protobuf:"varint,3,opt,name=endId,proto3" json:"endId,omitempty"`
-	Bill    string `protobuf:"bytes,4,opt,name=bill,proto3" json:"bill,omitempty"`
+	FromId  uint64 `protobuf:"varint,2,opt,name=fromId,proto3" json:"fromId,omitempty"` // from id in GridBlockFee
+	EndId   uint64 `protobuf:"varint,3,opt,name=endId,proto3" json:"endId,omitempty"`   // end id in GridBlockFee
+	Bill    string `protobuf:"bytes,4,opt,name=bill,proto3" json:"bill,omitempty"`      // json [{"grid": "grid111","profit":100}, {"grid": "grid222","profit":200}]
 	Status  int32  `protobuf:"varint,5,opt,name=status,proto3" json:"status,omitempty"`
 	Creator string `protobuf:"bytes,6,opt,name=creator,proto3" json:"creator,omitempty"`
 }

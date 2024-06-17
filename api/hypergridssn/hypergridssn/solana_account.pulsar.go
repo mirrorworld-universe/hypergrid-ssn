@@ -770,11 +770,11 @@ type SolanaAccount struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
+	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"` //Solana address
 	Version string `protobuf:"bytes,2,opt,name=version,proto3" json:"version,omitempty"`
-	Source  string `protobuf:"bytes,3,opt,name=source,proto3" json:"source,omitempty"`
+	Source  string `protobuf:"bytes,3,opt,name=source,proto3" json:"source,omitempty"` // -> HypergridNode
 	Slot    string `protobuf:"bytes,4,opt,name=slot,proto3" json:"slot,omitempty"`
-	Value   string `protobuf:"bytes,5,opt,name=value,proto3" json:"value,omitempty"`
+	Value   string `protobuf:"bytes,5,opt,name=value,proto3" json:"value,omitempty"` // Solana Account Info
 	Creator string `protobuf:"bytes,6,opt,name=creator,proto3" json:"creator,omitempty"`
 }
 

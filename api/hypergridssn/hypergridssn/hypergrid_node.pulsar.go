@@ -738,10 +738,10 @@ type HypergridNode struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Pubkey    string `protobuf:"bytes,1,opt,name=pubkey,proto3" json:"pubkey,omitempty"`
+	Pubkey    string `protobuf:"bytes,1,opt,name=pubkey,proto3" json:"pubkey,omitempty"` // Grid's pubkey
 	Name      string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Rpc       string `protobuf:"bytes,3,opt,name=rpc,proto3" json:"rpc,omitempty"`
-	Role      int32  `protobuf:"varint,4,opt,name=role,proto3" json:"role,omitempty"`
+	Rpc       string `protobuf:"bytes,3,opt,name=rpc,proto3" json:"rpc,omitempty"`    // Grid RPC
+	Role      int32  `protobuf:"varint,4,opt,name=role,proto3" json:"role,omitempty"` // 0: unknown, 1: Solana L1, 2: SSN, 3: Grid, 4: Sonic Grid
 	Starttime int32  `protobuf:"varint,5,opt,name=starttime,proto3" json:"starttime,omitempty"`
 	Creator   string `protobuf:"bytes,6,opt,name=creator,proto3" json:"creator,omitempty"`
 }
