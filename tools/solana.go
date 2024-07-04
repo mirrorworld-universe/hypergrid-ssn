@@ -10,7 +10,7 @@ import (
 	"github.com/gagliardetto/solana-go/rpc"
 	confirm "github.com/gagliardetto/solana-go/rpc/sendAndConfirmTransaction"
 	"github.com/gagliardetto/solana-go/rpc/ws"
-	"github.com/gagliardetto/solana-go/text"
+	"github.com/near/borsh-go"
 )
 
 func GetAccountInfo(rpcUrl string, address string) (*rpc.GetAccountInfoResult, error) {
@@ -61,44 +61,92 @@ func RequestAirdrop(rpcUrl string, address string, amount uint64) {
 	spew.Dump(out)
 }
 
-func SendTransaction(rpcUrl string, programID string) {
+type SettlementBillParam struct {
+	Key    solana.PublicKey
+	Amount uint64
+}
+
+type SettleFeeBillParams struct {
+	FromID uint64
+	EndID  uint64
+	Bills  []SettlementBillParam
+}
+
+const ProgramID = "SonicFeeSet11111111111111111111111111111111"
+
+func SendTxFeeSettlement(rpcUrl string, data_accounts []string, FromId uint64, EndID uint64, bills map[string]uint64) (*solana.Signature, error) {
 	// Create a new RPC client:
 	rpcClient := rpc.New(rpcUrl)
 
 	// Create a new WS client (used for confirming transactions)
 	wsClient, err := ws.Connect(context.Background(), rpc.DevNet_WS)
 	if err != nil {
-		panic(err)
+		// panic(err)
+		return nil, err
+	}
+
+	//get home path "~/"
+	home, err := os.UserHomeDir()
+	if err != nil {
+		// panic(err)
+		return nil, err
 	}
 
 	// Load the account that you will send funds FROM:
-	accountFrom, err := solana.PrivateKeyFromSolanaKeygenFile("/path/to/.config/solana/id.json")
+	accountFrom, err := solana.PrivateKeyFromSolanaKeygenFile(home + "/.config/solana/id.json")
 	if err != nil {
-		panic(err)
+		// panic(err)
+		return nil, err
 	}
 	fmt.Println("accountFrom private key:", accountFrom)
 	fmt.Println("accountFrom public key:", accountFrom.PublicKey())
 
 	recent, err := rpcClient.GetRecentBlockhash(context.TODO(), rpc.CommitmentFinalized)
 	if err != nil {
-		panic(err)
+		// panic(err)
+		return nil, err
 	}
 
+	Bills := []SettlementBillParam{}
+	// convert bills to []SettlementBillParam
+	for key, value := range bills {
+		Bills = append(Bills, SettlementBillParam{
+			Key:    solana.MustPublicKeyFromBase58(key),
+			Amount: value,
+		})
+	}
+
+	instructionData := SettleFeeBillParams{
+		FromID: FromId,
+		EndID:  EndID,
+		Bills:  Bills,
+	}
+
+	// Serialize to bytes using Borsh
+	serializedData, err := borsh.Serialize(instructionData)
+	if err != nil {
+		// panic(err)
+		return nil, err
+	}
+
+	accounts := solana.AccountMetaSlice{}
+	for _, data_account := range data_accounts {
+		accounts = append(accounts, solana.NewAccountMeta(solana.MustPublicKeyFromBase58(data_account), true, false))
+	}
 	tx, err := solana.NewTransaction(
 		[]solana.Instruction{
 			solana.NewInstruction(
-				solana.MustPublicKeyFromBase58(programID),
-				solana.AccountMetaSlice{
-					solana.NewAccountMeta(accountFrom.PublicKey(), false, true),
-				},
-				[]byte{1, 2, 3, 4}, // data
+				solana.MustPublicKeyFromBase58(ProgramID),
+				accounts,
+				serializedData, // data
 			),
 		},
 		recent.Value.Blockhash,
 		solana.TransactionPayer(accountFrom.PublicKey()),
 	)
 	if err != nil {
-		panic(err)
+		// panic(err)
+		return nil, err
 	}
 
 	_, err = tx.Sign(
@@ -110,11 +158,10 @@ func SendTransaction(rpcUrl string, programID string) {
 		},
 	)
 	if err != nil {
-		panic(fmt.Errorf("unable to sign transaction: %w", err))
+		// panic(fmt.Errorf("unable to sign transaction: %w", err))
+		return nil, err
 	}
 	spew.Dump(tx)
-	// Pretty print the transaction:
-	tx.EncodeTree(text.NewTreeEncoder(os.Stdout, "Transfer SOL"))
 
 	// Send transaction, and wait for confirmation:
 	sig, err := confirm.SendAndConfirmTransaction(
@@ -124,9 +171,11 @@ func SendTransaction(rpcUrl string, programID string) {
 		tx,
 	)
 	if err != nil {
-		panic(err)
+		// panic(err)
+		return nil, err
 	}
 	spew.Dump(sig)
+	return &sig, nil
 }
 
 // func main() {
