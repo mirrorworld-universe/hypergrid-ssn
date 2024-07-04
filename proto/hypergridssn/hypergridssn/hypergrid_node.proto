@@ -8,7 +8,8 @@ message HypergridNode {
   string name = 2; 
   string rpc = 3; // Grid RPC
   int32 role = 4; // 0: unknown, 1: Solana L1, 2: SSN, 3: Grid, 4: Sonic Grid
-  int32 starttime = 5; 
-  string creator = 6;
+  string data_account = 5; // data account for storing bill
+  int32 starttime = 6; 
+  string creator = 7;
 }
 

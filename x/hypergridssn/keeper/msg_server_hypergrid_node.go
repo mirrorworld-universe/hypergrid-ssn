@@ -23,12 +23,13 @@ func (k msgServer) CreateHypergridNode(goCtx context.Context, msg *types.MsgCrea
 	}
 
 	var hypergridNode = types.HypergridNode{
-		Creator:   msg.Creator,
-		Pubkey:    msg.Pubkey,
-		Name:      msg.Name,
-		Rpc:       msg.Rpc,
-		Role:      msg.Role,
-		Starttime: msg.Starttime,
+		Creator:     msg.Creator,
+		Pubkey:      msg.Pubkey,
+		Name:        msg.Name,
+		Rpc:         msg.Rpc,
+		DataAccount: msg.DataAccount,
+		Role:        msg.Role,
+		Starttime:   msg.Starttime,
 	}
 
 	k.SetHypergridNode(
@@ -56,12 +57,13 @@ func (k msgServer) UpdateHypergridNode(goCtx context.Context, msg *types.MsgUpda
 	}
 
 	var hypergridNode = types.HypergridNode{
-		Creator:   msg.Creator,
-		Pubkey:    msg.Pubkey,
-		Name:      msg.Name,
-		Rpc:       msg.Rpc,
-		Role:      msg.Role,
-		Starttime: msg.Starttime,
+		Creator:     msg.Creator,
+		Pubkey:      msg.Pubkey,
+		Name:        msg.Name,
+		Rpc:         msg.Rpc,
+		DataAccount: msg.DataAccount,
+		Role:        msg.Role,
+		Starttime:   msg.Starttime,
 	}
 
 	k.SetHypergridNode(ctx, hypergridNode)
