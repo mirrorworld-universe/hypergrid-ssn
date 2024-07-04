@@ -92,21 +92,21 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				},
 				{
 					RpcMethod:      "CreateGridBlockFee",
-					Use:            "create-grid-block-fee [grid] [slot] [blockhash] [blocktime] [fee]",
+					Use:            "create-grid-block-fee [items]",
 					Short:          "Create GridBlockFee",
-					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "grid"}, {ProtoField: "slot"}, {ProtoField: "blockhash"}, {ProtoField: "blocktime"}, {ProtoField: "fee"}},
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "items"}},
 				},
 				{
 					RpcMethod:      "CreateHypergridNode",
-					Use:            "create-hypergrid-node [pubkey] [name] [rpc] [role] [starttime]",
+					Use:            "create-hypergrid-node [pubkey] [name] [rpc] [data_account] [role] [starttime]",
 					Short:          "Create a new HypergridNode",
-					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "pubkey"}, {ProtoField: "name"}, {ProtoField: "rpc"}, {ProtoField: "role"}, {ProtoField: "starttime"}},
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "pubkey"}, {ProtoField: "name"}, {ProtoField: "rpc"}, {ProtoField: "role"}, {ProtoField: "data_account"}, {ProtoField: "starttime"}},
 				},
 				{
 					RpcMethod:      "UpdateHypergridNode",
-					Use:            "update-hypergrid-node [pubkey] [name] [rpc] [role] [starttime]",
+					Use:            "update-hypergrid-node [pubkey] [name] [rpc] [data_account] [role] [starttime]",
 					Short:          "Update HypergridNode",
-					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "pubkey"}, {ProtoField: "name"}, {ProtoField: "rpc"}, {ProtoField: "role"}, {ProtoField: "starttime"}},
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "pubkey"}, {ProtoField: "name"}, {ProtoField: "rpc"}, {ProtoField: "role"}, {ProtoField: "data_account"}, {ProtoField: "starttime"}},
 				},
 				{
 					RpcMethod:      "DeleteHypergridNode",
