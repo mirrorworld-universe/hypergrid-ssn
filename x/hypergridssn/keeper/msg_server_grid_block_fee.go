@@ -11,21 +11,25 @@ import (
 func (k msgServer) CreateGridBlockFee(goCtx context.Context, msg *types.MsgCreateGridBlockFee) (*types.MsgCreateGridBlockFeeResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	var gridBlockFee = types.GridBlockFee{
-		Creator:   msg.Creator,
-		Grid:      msg.Grid,
-		Slot:      msg.Slot,
-		Blockhash: msg.Blockhash,
-		Blocktime: msg.Blocktime,
-		Fee:       msg.Fee,
+	ids := make([]uint64, len(msg.Items))
+	for _, item := range msg.Items {
+		var gridBlockFee = types.GridBlockFee{
+			Creator:   msg.Creator,
+			Grid:      item.Grid,
+			Slot:      item.Slot,
+			Blockhash: item.Blockhash,
+			Blocktime: item.Blocktime,
+			Fee:       item.Fee,
+		}
+
+		id := k.AppendGridBlockFee(
+			ctx,
+			gridBlockFee,
+		)
+		ids = append(ids, id)
 	}
 
-	id := k.AppendGridBlockFee(
-		ctx,
-		gridBlockFee,
-	)
-
 	return &types.MsgCreateGridBlockFeeResponse{
-		Id: id,
+		Id: ids[len(ids)-1],
 	}, nil
 }
