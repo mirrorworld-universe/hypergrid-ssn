@@ -26,7 +26,7 @@ func (k msgServer) CreateSolanaAccount(goCtx context.Context, msg *types.MsgCrea
 		return nil, errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "index already set")
 	}
 
-	//TODO: get hypergrid node from msg.Source
+	//get hypergrid node from msg.Source
 	node, found := k.GetHypergridNode(goCtx, msg.Source)
 	if !found {
 		return nil, errorsmod.Wrap(sdkerrors.ErrKeyNotFound, "source not found")
