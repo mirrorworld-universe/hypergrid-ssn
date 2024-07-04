@@ -83,14 +83,23 @@ message MsgDeleteSolanaAccount {
 
 message MsgDeleteSolanaAccountResponse {}
 
+message GridBlockFeeItem {
+  string grid      = 1;
+  string slot      = 2;     
+  string blockhash = 3;
+  int32 blocktime  = 4;
+  string fee       = 5;
+}
+
 message MsgCreateGridBlockFee {
   option (cosmos.msg.v1.signer) = "creator";
   string creator   = 1;
-  string grid      = 2;
-  string slot      = 3;
-  string blockhash = 4;
-  int32  blocktime = 5;
-  string fee       = 6;
+  // string grid      = 2;
+  // string slot      = 3;
+  // string blockhash = 4;
+  // int32  blocktime = 5;
+  // string fee       = 6;
+  repeated GridBlockFeeItem items = 2;
 }
 
 message MsgCreateGridBlockFeeResponse {
@@ -103,8 +112,9 @@ message MsgCreateHypergridNode {
   string pubkey    = 2;
   string name      = 3;
   string rpc       = 4;
-  int32  role      = 5;
-  int32  starttime = 6;
+  string data_account = 5;
+  int32  role      = 6;
+  int32  starttime = 7;
 }
 
 message MsgCreateHypergridNodeResponse {}
@@ -115,8 +125,9 @@ message MsgUpdateHypergridNode {
   string pubkey    = 2;
   string name      = 3;
   string rpc       = 4;
-  int32  role      = 5;
-  int32  starttime = 6;
+  string data_account = 5;
+  int32  role      = 6;
+  int32  starttime = 7;
 }
 
 message MsgUpdateHypergridNodeResponse {}
@@ -138,4 +149,5 @@ message MsgCreateFeeSettlementBill {
 
 message MsgCreateFeeSettlementBillResponse {
   uint64 id = 1;
+  string txhash = 2;
 }

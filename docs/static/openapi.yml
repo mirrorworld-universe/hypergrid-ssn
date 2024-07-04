@@ -3501,6 +3501,820 @@ paths:
               Since: cosmos-sdk 0.47
       tags:
         - Msg
+  /hypergrid-ssn/hypergridssn/fee_settlement_bill:
+    get:
+      operationId: HypergridssnHypergridssnQuery_FeeSettlementBillAll
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              FeeSettlementBill:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      format: uint64
+                    fromId:
+                      type: string
+                      format: uint64
+                      title: from id in GridBlockFee
+                    endId:
+                      type: string
+                      format: uint64
+                      title: end id in GridBlockFee
+                    bill:
+                      type: string
+                      title: >-
+                        json [{"grid": "grid111","profit":100}, {"grid":
+                        "grid222","profit":200}]
+                    status:
+                      type: integer
+                      format: int32
+                    creator:
+                      type: string
+              pagination:
+                type: object
+                properties:
+                  next_key:
+                    type: string
+                    format: byte
+                    description: |-
+                      next_key is the key to be passed to PageRequest.key to
+                      query the next page most efficiently. It will be empty if
+                      there are no more results.
+                  total:
+                    type: string
+                    format: uint64
+                    title: >-
+                      total is total number of results available if
+                      PageRequest.count_total
+
+                      was set, its value is undefined otherwise
+                description: >-
+                  PageResponse is to be embedded in gRPC response messages where
+                  the
+
+                  corresponding request message has used PageRequest.
+
+                   message SomeResponse {
+                           repeated Bar results = 1;
+                           PageResponse page = 2;
+                   }
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    '@type':
+                      type: string
+                  additionalProperties: {}
+      parameters:
+        - name: pagination.key
+          description: |-
+            key is a value returned in PageResponse.next_key to begin
+            querying the next page most efficiently. Only one of offset or key
+            should be set.
+          in: query
+          required: false
+          type: string
+          format: byte
+        - name: pagination.offset
+          description: >-
+            offset is a numeric offset that can be used when key is unavailable.
+
+            It is less efficient than using key. Only one of offset or key
+            should
+
+            be set.
+          in: query
+          required: false
+          type: string
+          format: uint64
+        - name: pagination.limit
+          description: >-
+            limit is the total number of results to be returned in the result
+            page.
+
+            If left empty it will default to a value to be set by each app.
+          in: query
+          required: false
+          type: string
+          format: uint64
+        - name: pagination.count_total
+          description: >-
+            count_total is set to true  to indicate that the result set should
+            include
+
+            a count of the total number of items available for pagination in
+            UIs.
+
+            count_total is only respected when offset is used. It is ignored
+            when key
+
+            is set.
+          in: query
+          required: false
+          type: boolean
+        - name: pagination.reverse
+          description: >-
+            reverse is set to true if results are to be returned in the
+            descending order.
+
+
+            Since: cosmos-sdk 0.43
+          in: query
+          required: false
+          type: boolean
+      tags:
+        - Query
+  /hypergrid-ssn/hypergridssn/fee_settlement_bill/{id}:
+    get:
+      summary: Queries a list of FeeSettlementBill items.
+      operationId: HypergridssnHypergridssnQuery_FeeSettlementBill
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              FeeSettlementBill:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uint64
+                  fromId:
+                    type: string
+                    format: uint64
+                    title: from id in GridBlockFee
+                  endId:
+                    type: string
+                    format: uint64
+                    title: end id in GridBlockFee
+                  bill:
+                    type: string
+                    title: >-
+                      json [{"grid": "grid111","profit":100}, {"grid":
+                      "grid222","profit":200}]
+                  status:
+                    type: integer
+                    format: int32
+                  creator:
+                    type: string
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    '@type':
+                      type: string
+                  additionalProperties: {}
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+          format: uint64
+      tags:
+        - Query
+  /hypergrid-ssn/hypergridssn/grid_block_fee:
+    get:
+      operationId: HypergridssnHypergridssnQuery_GridBlockFeeAll
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              GridBlockFee:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      format: uint64
+                    grid:
+                      type: string
+                    slot:
+                      type: string
+                    blockhash:
+                      type: string
+                    blocktime:
+                      type: integer
+                      format: int32
+                    fee:
+                      type: string
+                    creator:
+                      type: string
+              pagination:
+                type: object
+                properties:
+                  next_key:
+                    type: string
+                    format: byte
+                    description: |-
+                      next_key is the key to be passed to PageRequest.key to
+                      query the next page most efficiently. It will be empty if
+                      there are no more results.
+                  total:
+                    type: string
+                    format: uint64
+                    title: >-
+                      total is total number of results available if
+                      PageRequest.count_total
+
+                      was set, its value is undefined otherwise
+                description: >-
+                  PageResponse is to be embedded in gRPC response messages where
+                  the
+
+                  corresponding request message has used PageRequest.
+
+                   message SomeResponse {
+                           repeated Bar results = 1;
+                           PageResponse page = 2;
+                   }
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    '@type':
+                      type: string
+                  additionalProperties: {}
+      parameters:
+        - name: pagination.key
+          description: |-
+            key is a value returned in PageResponse.next_key to begin
+            querying the next page most efficiently. Only one of offset or key
+            should be set.
+          in: query
+          required: false
+          type: string
+          format: byte
+        - name: pagination.offset
+          description: >-
+            offset is a numeric offset that can be used when key is unavailable.
+
+            It is less efficient than using key. Only one of offset or key
+            should
+
+            be set.
+          in: query
+          required: false
+          type: string
+          format: uint64
+        - name: pagination.limit
+          description: >-
+            limit is the total number of results to be returned in the result
+            page.
+
+            If left empty it will default to a value to be set by each app.
+          in: query
+          required: false
+          type: string
+          format: uint64
+        - name: pagination.count_total
+          description: >-
+            count_total is set to true  to indicate that the result set should
+            include
+
+            a count of the total number of items available for pagination in
+            UIs.
+
+            count_total is only respected when offset is used. It is ignored
+            when key
+
+            is set.
+          in: query
+          required: false
+          type: boolean
+        - name: pagination.reverse
+          description: >-
+            reverse is set to true if results are to be returned in the
+            descending order.
+
+
+            Since: cosmos-sdk 0.43
+          in: query
+          required: false
+          type: boolean
+      tags:
+        - Query
+  /hypergrid-ssn/hypergridssn/grid_block_fee/{id}:
+    get:
+      summary: Queries a list of GridBlockFee items.
+      operationId: HypergridssnHypergridssnQuery_GridBlockFee
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              GridBlockFee:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uint64
+                  grid:
+                    type: string
+                  slot:
+                    type: string
+                  blockhash:
+                    type: string
+                  blocktime:
+                    type: integer
+                    format: int32
+                  fee:
+                    type: string
+                  creator:
+                    type: string
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    '@type':
+                      type: string
+                  additionalProperties: {}
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+          format: uint64
+      tags:
+        - Query
+  /hypergrid-ssn/hypergridssn/hypergrid_node:
+    get:
+      operationId: HypergridssnHypergridssnQuery_HypergridNodeAll
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              hypergridNode:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    pubkey:
+                      type: string
+                      title: Grid's pubkey
+                    name:
+                      type: string
+                    rpc:
+                      type: string
+                      title: Grid RPC
+                    role:
+                      type: integer
+                      format: int32
+                      title: '0: unknown, 1: Solana L1, 2: SSN, 3: Grid, 4: Sonic Grid'
+                    data_account:
+                      type: string
+                      title: data account for storing bill
+                    starttime:
+                      type: integer
+                      format: int32
+                    creator:
+                      type: string
+              pagination:
+                type: object
+                properties:
+                  next_key:
+                    type: string
+                    format: byte
+                    description: |-
+                      next_key is the key to be passed to PageRequest.key to
+                      query the next page most efficiently. It will be empty if
+                      there are no more results.
+                  total:
+                    type: string
+                    format: uint64
+                    title: >-
+                      total is total number of results available if
+                      PageRequest.count_total
+
+                      was set, its value is undefined otherwise
+                description: >-
+                  PageResponse is to be embedded in gRPC response messages where
+                  the
+
+                  corresponding request message has used PageRequest.
+
+                   message SomeResponse {
+                           repeated Bar results = 1;
+                           PageResponse page = 2;
+                   }
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    '@type':
+                      type: string
+                  additionalProperties: {}
+      parameters:
+        - name: pagination.key
+          description: |-
+            key is a value returned in PageResponse.next_key to begin
+            querying the next page most efficiently. Only one of offset or key
+            should be set.
+          in: query
+          required: false
+          type: string
+          format: byte
+        - name: pagination.offset
+          description: >-
+            offset is a numeric offset that can be used when key is unavailable.
+
+            It is less efficient than using key. Only one of offset or key
+            should
+
+            be set.
+          in: query
+          required: false
+          type: string
+          format: uint64
+        - name: pagination.limit
+          description: >-
+            limit is the total number of results to be returned in the result
+            page.
+
+            If left empty it will default to a value to be set by each app.
+          in: query
+          required: false
+          type: string
+          format: uint64
+        - name: pagination.count_total
+          description: >-
+            count_total is set to true  to indicate that the result set should
+            include
+
+            a count of the total number of items available for pagination in
+            UIs.
+
+            count_total is only respected when offset is used. It is ignored
+            when key
+
+            is set.
+          in: query
+          required: false
+          type: boolean
+        - name: pagination.reverse
+          description: >-
+            reverse is set to true if results are to be returned in the
+            descending order.
+
+
+            Since: cosmos-sdk 0.43
+          in: query
+          required: false
+          type: boolean
+      tags:
+        - Query
+  /hypergrid-ssn/hypergridssn/hypergrid_node/{pubkey}:
+    get:
+      summary: Queries a list of HypergridNode items.
+      operationId: HypergridssnHypergridssnQuery_HypergridNode
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              hypergridNode:
+                type: object
+                properties:
+                  pubkey:
+                    type: string
+                    title: Grid's pubkey
+                  name:
+                    type: string
+                  rpc:
+                    type: string
+                    title: Grid RPC
+                  role:
+                    type: integer
+                    format: int32
+                    title: '0: unknown, 1: Solana L1, 2: SSN, 3: Grid, 4: Sonic Grid'
+                  data_account:
+                    type: string
+                    title: data account for storing bill
+                  starttime:
+                    type: integer
+                    format: int32
+                  creator:
+                    type: string
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    '@type':
+                      type: string
+                  additionalProperties: {}
+      parameters:
+        - name: pubkey
+          in: path
+          required: true
+          type: string
+      tags:
+        - Query
+  /hypergrid-ssn/hypergridssn/params:
+    get:
+      summary: Parameters queries the parameters of the module.
+      operationId: HypergridssnHypergridssnQuery_Params
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              params:
+                description: params holds all the parameters of this module.
+                type: object
+            description: >-
+              QueryParamsResponse is response type for the Query/Params RPC
+              method.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    '@type':
+                      type: string
+                  additionalProperties: {}
+      tags:
+        - Query
+  /hypergrid-ssn/hypergridssn/solana_account:
+    get:
+      operationId: HypergridssnHypergridssnQuery_SolanaAccountAll
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              solanaAccount:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    address:
+                      type: string
+                      title: Solana address
+                    version:
+                      type: string
+                    source:
+                      type: string
+                      title: '-> HypergridNode'
+                    slot:
+                      type: string
+                    value:
+                      type: string
+                      title: Solana Account Info
+                    creator:
+                      type: string
+              pagination:
+                type: object
+                properties:
+                  next_key:
+                    type: string
+                    format: byte
+                    description: |-
+                      next_key is the key to be passed to PageRequest.key to
+                      query the next page most efficiently. It will be empty if
+                      there are no more results.
+                  total:
+                    type: string
+                    format: uint64
+                    title: >-
+                      total is total number of results available if
+                      PageRequest.count_total
+
+                      was set, its value is undefined otherwise
+                description: >-
+                  PageResponse is to be embedded in gRPC response messages where
+                  the
+
+                  corresponding request message has used PageRequest.
+
+                   message SomeResponse {
+                           repeated Bar results = 1;
+                           PageResponse page = 2;
+                   }
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    '@type':
+                      type: string
+                  additionalProperties: {}
+      parameters:
+        - name: pagination.key
+          description: |-
+            key is a value returned in PageResponse.next_key to begin
+            querying the next page most efficiently. Only one of offset or key
+            should be set.
+          in: query
+          required: false
+          type: string
+          format: byte
+        - name: pagination.offset
+          description: >-
+            offset is a numeric offset that can be used when key is unavailable.
+
+            It is less efficient than using key. Only one of offset or key
+            should
+
+            be set.
+          in: query
+          required: false
+          type: string
+          format: uint64
+        - name: pagination.limit
+          description: >-
+            limit is the total number of results to be returned in the result
+            page.
+
+            If left empty it will default to a value to be set by each app.
+          in: query
+          required: false
+          type: string
+          format: uint64
+        - name: pagination.count_total
+          description: >-
+            count_total is set to true  to indicate that the result set should
+            include
+
+            a count of the total number of items available for pagination in
+            UIs.
+
+            count_total is only respected when offset is used. It is ignored
+            when key
+
+            is set.
+          in: query
+          required: false
+          type: boolean
+        - name: pagination.reverse
+          description: >-
+            reverse is set to true if results are to be returned in the
+            descending order.
+
+
+            Since: cosmos-sdk 0.43
+          in: query
+          required: false
+          type: boolean
+      tags:
+        - Query
+  /hypergrid-ssn/hypergridssn/solana_account/{address}/{version}:
+    get:
+      summary: Queries a list of SolanaAccount items.
+      operationId: HypergridssnHypergridssnQuery_SolanaAccount
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              solanaAccount:
+                type: object
+                properties:
+                  address:
+                    type: string
+                    title: Solana address
+                  version:
+                    type: string
+                  source:
+                    type: string
+                    title: '-> HypergridNode'
+                  slot:
+                    type: string
+                  value:
+                    type: string
+                    title: Solana Account Info
+                  creator:
+                    type: string
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    '@type':
+                      type: string
+                  additionalProperties: {}
+      parameters:
+        - name: address
+          in: path
+          required: true
+          type: string
+        - name: version
+          in: path
+          required: true
+          type: string
+      tags:
+        - Query
   /hypergridssn.hypergridssn.Msg/CreateFeeSettlementBill:
     post:
       operationId: HypergridssnHypergridssnMsg_CreateFeeSettlementBill
@@ -3513,6 +4327,8 @@ paths:
               id:
                 type: string
                 format: uint64
+              txhash:
+                type: string
         default:
           description: An unexpected error response.
           schema:
@@ -3587,17 +4403,28 @@ paths:
             properties:
               creator:
                 type: string
-              grid:
-                type: string
-              slot:
-                type: string
-              blockhash:
-                type: string
-              blocktime:
-                type: integer
-                format: int32
-              fee:
-                type: string
+              items:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    grid:
+                      type: string
+                    slot:
+                      type: string
+                    blockhash:
+                      type: string
+                    blocktime:
+                      type: integer
+                      format: int32
+                    fee:
+                      type: string
+                title: |-
+                  string grid      = 2;
+                  string slot      = 3;
+                  string blockhash = 4;
+                  int32  blocktime = 5;
+                  string fee       = 6;
       tags:
         - Msg
   /hypergridssn.hypergridssn.Msg/CreateHypergridNode:
@@ -3640,6 +4467,8 @@ paths:
               name:
                 type: string
               rpc:
+                type: string
+              data_account:
                 type: string
               role:
                 type: integer
@@ -3812,6 +4641,8 @@ paths:
               name:
                 type: string
               rpc:
+                type: string
+              data_account:
                 type: string
               role:
                 type: integer
@@ -5690,6 +6521,495 @@ definitions:
           min_commission_rate is the chain-wide minimum commission rate that a
           validator can charge their delegators
     description: Params defines the parameters for the x/staking module.
+  cosmos.base.query.v1beta1.PageRequest:
+    type: object
+    properties:
+      key:
+        type: string
+        format: byte
+        description: |-
+          key is a value returned in PageResponse.next_key to begin
+          querying the next page most efficiently. Only one of offset or key
+          should be set.
+      offset:
+        type: string
+        format: uint64
+        description: |-
+          offset is a numeric offset that can be used when key is unavailable.
+          It is less efficient than using key. Only one of offset or key should
+          be set.
+      limit:
+        type: string
+        format: uint64
+        description: >-
+          limit is the total number of results to be returned in the result
+          page.
+
+          If left empty it will default to a value to be set by each app.
+      count_total:
+        type: boolean
+        description: >-
+          count_total is set to true  to indicate that the result set should
+          include
+
+          a count of the total number of items available for pagination in UIs.
+
+          count_total is only respected when offset is used. It is ignored when
+          key
+
+          is set.
+      reverse:
+        type: boolean
+        description: >-
+          reverse is set to true if results are to be returned in the descending
+          order.
+
+
+          Since: cosmos-sdk 0.43
+    description: |-
+      message SomeRequest {
+               Foo some_parameter = 1;
+               PageRequest pagination = 2;
+       }
+    title: |-
+      PageRequest is to be embedded in gRPC request messages for efficient
+      pagination. Ex:
+  cosmos.base.query.v1beta1.PageResponse:
+    type: object
+    properties:
+      next_key:
+        type: string
+        format: byte
+        description: |-
+          next_key is the key to be passed to PageRequest.key to
+          query the next page most efficiently. It will be empty if
+          there are no more results.
+      total:
+        type: string
+        format: uint64
+        title: |-
+          total is total number of results available if PageRequest.count_total
+          was set, its value is undefined otherwise
+    description: |-
+      PageResponse is to be embedded in gRPC response messages where the
+      corresponding request message has used PageRequest.
+
+       message SomeResponse {
+               repeated Bar results = 1;
+               PageResponse page = 2;
+       }
+  hypergridssn.hypergridssn.FeeSettlementBill:
+    type: object
+    properties:
+      id:
+        type: string
+        format: uint64
+      fromId:
+        type: string
+        format: uint64
+        title: from id in GridBlockFee
+      endId:
+        type: string
+        format: uint64
+        title: end id in GridBlockFee
+      bill:
+        type: string
+        title: >-
+          json [{"grid": "grid111","profit":100}, {"grid":
+          "grid222","profit":200}]
+      status:
+        type: integer
+        format: int32
+      creator:
+        type: string
+  hypergridssn.hypergridssn.GridBlockFee:
+    type: object
+    properties:
+      id:
+        type: string
+        format: uint64
+      grid:
+        type: string
+      slot:
+        type: string
+      blockhash:
+        type: string
+      blocktime:
+        type: integer
+        format: int32
+      fee:
+        type: string
+      creator:
+        type: string
+  hypergridssn.hypergridssn.HypergridNode:
+    type: object
+    properties:
+      pubkey:
+        type: string
+        title: Grid's pubkey
+      name:
+        type: string
+      rpc:
+        type: string
+        title: Grid RPC
+      role:
+        type: integer
+        format: int32
+        title: '0: unknown, 1: Solana L1, 2: SSN, 3: Grid, 4: Sonic Grid'
+      data_account:
+        type: string
+        title: data account for storing bill
+      starttime:
+        type: integer
+        format: int32
+      creator:
+        type: string
+  hypergridssn.hypergridssn.Params:
+    type: object
+    description: Params defines the parameters for the module.
+  hypergridssn.hypergridssn.QueryAllFeeSettlementBillResponse:
+    type: object
+    properties:
+      FeeSettlementBill:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uint64
+            fromId:
+              type: string
+              format: uint64
+              title: from id in GridBlockFee
+            endId:
+              type: string
+              format: uint64
+              title: end id in GridBlockFee
+            bill:
+              type: string
+              title: >-
+                json [{"grid": "grid111","profit":100}, {"grid":
+                "grid222","profit":200}]
+            status:
+              type: integer
+              format: int32
+            creator:
+              type: string
+      pagination:
+        type: object
+        properties:
+          next_key:
+            type: string
+            format: byte
+            description: |-
+              next_key is the key to be passed to PageRequest.key to
+              query the next page most efficiently. It will be empty if
+              there are no more results.
+          total:
+            type: string
+            format: uint64
+            title: >-
+              total is total number of results available if
+              PageRequest.count_total
+
+              was set, its value is undefined otherwise
+        description: |-
+          PageResponse is to be embedded in gRPC response messages where the
+          corresponding request message has used PageRequest.
+
+           message SomeResponse {
+                   repeated Bar results = 1;
+                   PageResponse page = 2;
+           }
+  hypergridssn.hypergridssn.QueryAllGridBlockFeeResponse:
+    type: object
+    properties:
+      GridBlockFee:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uint64
+            grid:
+              type: string
+            slot:
+              type: string
+            blockhash:
+              type: string
+            blocktime:
+              type: integer
+              format: int32
+            fee:
+              type: string
+            creator:
+              type: string
+      pagination:
+        type: object
+        properties:
+          next_key:
+            type: string
+            format: byte
+            description: |-
+              next_key is the key to be passed to PageRequest.key to
+              query the next page most efficiently. It will be empty if
+              there are no more results.
+          total:
+            type: string
+            format: uint64
+            title: >-
+              total is total number of results available if
+              PageRequest.count_total
+
+              was set, its value is undefined otherwise
+        description: |-
+          PageResponse is to be embedded in gRPC response messages where the
+          corresponding request message has used PageRequest.
+
+           message SomeResponse {
+                   repeated Bar results = 1;
+                   PageResponse page = 2;
+           }
+  hypergridssn.hypergridssn.QueryAllHypergridNodeResponse:
+    type: object
+    properties:
+      hypergridNode:
+        type: array
+        items:
+          type: object
+          properties:
+            pubkey:
+              type: string
+              title: Grid's pubkey
+            name:
+              type: string
+            rpc:
+              type: string
+              title: Grid RPC
+            role:
+              type: integer
+              format: int32
+              title: '0: unknown, 1: Solana L1, 2: SSN, 3: Grid, 4: Sonic Grid'
+            data_account:
+              type: string
+              title: data account for storing bill
+            starttime:
+              type: integer
+              format: int32
+            creator:
+              type: string
+      pagination:
+        type: object
+        properties:
+          next_key:
+            type: string
+            format: byte
+            description: |-
+              next_key is the key to be passed to PageRequest.key to
+              query the next page most efficiently. It will be empty if
+              there are no more results.
+          total:
+            type: string
+            format: uint64
+            title: >-
+              total is total number of results available if
+              PageRequest.count_total
+
+              was set, its value is undefined otherwise
+        description: |-
+          PageResponse is to be embedded in gRPC response messages where the
+          corresponding request message has used PageRequest.
+
+           message SomeResponse {
+                   repeated Bar results = 1;
+                   PageResponse page = 2;
+           }
+  hypergridssn.hypergridssn.QueryAllSolanaAccountResponse:
+    type: object
+    properties:
+      solanaAccount:
+        type: array
+        items:
+          type: object
+          properties:
+            address:
+              type: string
+              title: Solana address
+            version:
+              type: string
+            source:
+              type: string
+              title: '-> HypergridNode'
+            slot:
+              type: string
+            value:
+              type: string
+              title: Solana Account Info
+            creator:
+              type: string
+      pagination:
+        type: object
+        properties:
+          next_key:
+            type: string
+            format: byte
+            description: |-
+              next_key is the key to be passed to PageRequest.key to
+              query the next page most efficiently. It will be empty if
+              there are no more results.
+          total:
+            type: string
+            format: uint64
+            title: >-
+              total is total number of results available if
+              PageRequest.count_total
+
+              was set, its value is undefined otherwise
+        description: |-
+          PageResponse is to be embedded in gRPC response messages where the
+          corresponding request message has used PageRequest.
+
+           message SomeResponse {
+                   repeated Bar results = 1;
+                   PageResponse page = 2;
+           }
+  hypergridssn.hypergridssn.QueryGetFeeSettlementBillResponse:
+    type: object
+    properties:
+      FeeSettlementBill:
+        type: object
+        properties:
+          id:
+            type: string
+            format: uint64
+          fromId:
+            type: string
+            format: uint64
+            title: from id in GridBlockFee
+          endId:
+            type: string
+            format: uint64
+            title: end id in GridBlockFee
+          bill:
+            type: string
+            title: >-
+              json [{"grid": "grid111","profit":100}, {"grid":
+              "grid222","profit":200}]
+          status:
+            type: integer
+            format: int32
+          creator:
+            type: string
+  hypergridssn.hypergridssn.QueryGetGridBlockFeeResponse:
+    type: object
+    properties:
+      GridBlockFee:
+        type: object
+        properties:
+          id:
+            type: string
+            format: uint64
+          grid:
+            type: string
+          slot:
+            type: string
+          blockhash:
+            type: string
+          blocktime:
+            type: integer
+            format: int32
+          fee:
+            type: string
+          creator:
+            type: string
+  hypergridssn.hypergridssn.QueryGetHypergridNodeResponse:
+    type: object
+    properties:
+      hypergridNode:
+        type: object
+        properties:
+          pubkey:
+            type: string
+            title: Grid's pubkey
+          name:
+            type: string
+          rpc:
+            type: string
+            title: Grid RPC
+          role:
+            type: integer
+            format: int32
+            title: '0: unknown, 1: Solana L1, 2: SSN, 3: Grid, 4: Sonic Grid'
+          data_account:
+            type: string
+            title: data account for storing bill
+          starttime:
+            type: integer
+            format: int32
+          creator:
+            type: string
+  hypergridssn.hypergridssn.QueryGetSolanaAccountResponse:
+    type: object
+    properties:
+      solanaAccount:
+        type: object
+        properties:
+          address:
+            type: string
+            title: Solana address
+          version:
+            type: string
+          source:
+            type: string
+            title: '-> HypergridNode'
+          slot:
+            type: string
+          value:
+            type: string
+            title: Solana Account Info
+          creator:
+            type: string
+  hypergridssn.hypergridssn.QueryParamsResponse:
+    type: object
+    properties:
+      params:
+        description: params holds all the parameters of this module.
+        type: object
+    description: QueryParamsResponse is response type for the Query/Params RPC method.
+  hypergridssn.hypergridssn.SolanaAccount:
+    type: object
+    properties:
+      address:
+        type: string
+        title: Solana address
+      version:
+        type: string
+      source:
+        type: string
+        title: '-> HypergridNode'
+      slot:
+        type: string
+      value:
+        type: string
+        title: Solana Account Info
+      creator:
+        type: string
+  hypergridssn.hypergridssn.GridBlockFeeItem:
+    type: object
+    properties:
+      grid:
+        type: string
+      slot:
+        type: string
+      blockhash:
+        type: string
+      blocktime:
+        type: integer
+        format: int32
+      fee:
+        type: string
   hypergridssn.hypergridssn.MsgCreateFeeSettlementBill:
     type: object
     properties:
@@ -5707,22 +7027,35 @@ definitions:
       id:
         type: string
         format: uint64
+      txhash:
+        type: string
   hypergridssn.hypergridssn.MsgCreateGridBlockFee:
     type: object
     properties:
       creator:
         type: string
-      grid:
-        type: string
-      slot:
-        type: string
-      blockhash:
-        type: string
-      blocktime:
-        type: integer
-        format: int32
-      fee:
-        type: string
+      items:
+        type: array
+        items:
+          type: object
+          properties:
+            grid:
+              type: string
+            slot:
+              type: string
+            blockhash:
+              type: string
+            blocktime:
+              type: integer
+              format: int32
+            fee:
+              type: string
+        title: |-
+          string grid      = 2;
+          string slot      = 3;
+          string blockhash = 4;
+          int32  blocktime = 5;
+          string fee       = 6;
   hypergridssn.hypergridssn.MsgCreateGridBlockFeeResponse:
     type: object
     properties:
@@ -5739,6 +7072,8 @@ definitions:
       name:
         type: string
       rpc:
+        type: string
+      data_account:
         type: string
       role:
         type: integer
@@ -5792,6 +7127,8 @@ definitions:
         type: string
       rpc:
         type: string
+      data_account:
+        type: string
       role:
         type: integer
         format: int32
@@ -5828,6 +7165,3 @@ definitions:
         type: string
   hypergridssn.hypergridssn.MsgUpdateSolanaAccountResponse:
     type: object
-  hypergridssn.hypergridssn.Params:
-    type: object
-    description: Params defines the parameters for the module.
