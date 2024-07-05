@@ -69,7 +69,7 @@ func (k msgServer) CreateFeeSettlementBill(goCtx context.Context, msg *types.Msg
 	nodes := k.GetAllHypergridNode(goCtx)
 	for _, node := range nodes {
 		// get sonic grid node from the list
-		if node.Role == 4 && sonic_grid_rpc == "" {
+		if node.Role == 2 && sonic_grid_rpc == "" {
 			sonic_grid_rpc = node.Rpc
 		}
 		if node.DataAccount != "" {
