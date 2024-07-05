@@ -3916,7 +3916,9 @@ paths:
                     role:
                       type: integer
                       format: int32
-                      title: '0: unknown, 1: Solana L1, 2: SSN, 3: Grid, 4: Sonic Grid'
+                      title: >-
+                        0: unknown, 1: HSSN, 2: Sonic Grid, 3: Grid, 4: Solana
+                        L1
                     data_account:
                       type: string
                       title: data account for storing bill
@@ -4054,7 +4056,7 @@ paths:
                   role:
                     type: integer
                     format: int32
-                    title: '0: unknown, 1: Solana L1, 2: SSN, 3: Grid, 4: Sonic Grid'
+                    title: '0: unknown, 1: HSSN, 2: Sonic Grid, 3: Grid, 4: Solana L1'
                   data_account:
                     type: string
                     title: data account for storing bill
@@ -6655,7 +6657,7 @@ definitions:
       role:
         type: integer
         format: int32
-        title: '0: unknown, 1: Solana L1, 2: SSN, 3: Grid, 4: Sonic Grid'
+        title: '0: unknown, 1: HSSN, 2: Sonic Grid, 3: Grid, 4: Solana L1'
       data_account:
         type: string
         title: data account for storing bill
@@ -6791,7 +6793,7 @@ definitions:
             role:
               type: integer
               format: int32
-              title: '0: unknown, 1: Solana L1, 2: SSN, 3: Grid, 4: Sonic Grid'
+              title: '0: unknown, 1: HSSN, 2: Sonic Grid, 3: Grid, 4: Solana L1'
             data_account:
               type: string
               title: data account for storing bill
@@ -6941,7 +6943,7 @@ definitions:
           role:
             type: integer
             format: int32
-            title: '0: unknown, 1: Solana L1, 2: SSN, 3: Grid, 4: Sonic Grid'
+            title: '0: unknown, 1: HSSN, 2: Sonic Grid, 3: Grid, 4: Solana L1'
           data_account:
             type: string
             title: data account for storing bill

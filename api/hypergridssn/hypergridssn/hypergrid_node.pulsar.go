@@ -805,7 +805,7 @@ type HypergridNode struct {
 	Pubkey      string `protobuf:"bytes,1,opt,name=pubkey,proto3" json:"pubkey,omitempty"` // Grid's pubkey
 	Name        string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	Rpc         string `protobuf:"bytes,3,opt,name=rpc,proto3" json:"rpc,omitempty"`                                    // Grid RPC
-	Role        int32  `protobuf:"varint,4,opt,name=role,proto3" json:"role,omitempty"`                                 // 0: unknown, 1: Solana L1, 2: SSN, 3: Grid, 4: Sonic Grid
+	Role        int32  `protobuf:"varint,4,opt,name=role,proto3" json:"role,omitempty"`                                 // 0: unknown, 1: HSSN, 2: Sonic Grid, 3: Grid, 4: Solana L1
 	DataAccount string `protobuf:"bytes,5,opt,name=data_account,json=dataAccount,proto3" json:"data_account,omitempty"` // data account for storing bill
 	Starttime   int32  `protobuf:"varint,6,opt,name=starttime,proto3" json:"starttime,omitempty"`
 	Creator     string `protobuf:"bytes,7,opt,name=creator,proto3" json:"creator,omitempty"`
