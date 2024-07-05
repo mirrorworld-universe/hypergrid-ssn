@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/gagliardetto/solana-go"
@@ -67,19 +68,30 @@ type SettlementBillParam struct {
 }
 
 type SettleFeeBillParams struct {
-	FromID uint64
-	EndID  uint64
-	Bills  []SettlementBillParam
+	Instruction uint32
+	FromID      uint64
+	EndID       uint64
+	Bills       []SettlementBillParam
 }
 
-const ProgramID = "SonicFeeSet11111111111111111111111111111111"
+type InitializedParams struct {
+	Instruction uint32
+	Owner       solana.PublicKey
+	AccountType byte
+}
 
-func SendTxFeeSettlement(rpcUrl string, data_accounts []string, FromId uint64, EndID uint64, bills map[string]uint64) (*solana.Signature, error) {
+const ProgramID = "SonicFeeSet1ement11111111111111111111111111"
+
+func sendSonicTx(rpcUrl string, accounts solana.AccountMetaSlice, instructionData []byte) (*solana.Signature, error) {
 	// Create a new RPC client:
 	rpcClient := rpc.New(rpcUrl)
 
 	// Create a new WS client (used for confirming transactions)
-	wsClient, err := ws.Connect(context.Background(), rpc.DevNet_WS)
+	//replace http or https with ws
+	rpcWsUrl := strings.Replace(rpcUrl, "http://", "ws://", 1)
+	rpcWsUrl = strings.Replace(rpcWsUrl, "https://", "wss://", 1)
+
+	wsClient, err := ws.Connect(context.Background(), rpcWsUrl)
 	if err != nil {
 		// panic(err)
 		return nil, err
@@ -107,38 +119,12 @@ func SendTxFeeSettlement(rpcUrl string, data_accounts []string, FromId uint64, E
 		return nil, err
 	}
 
-	Bills := []SettlementBillParam{}
-	// convert bills to []SettlementBillParam
-	for key, value := range bills {
-		Bills = append(Bills, SettlementBillParam{
-			Key:    solana.MustPublicKeyFromBase58(key),
-			Amount: value,
-		})
-	}
-
-	instructionData := SettleFeeBillParams{
-		FromID: FromId,
-		EndID:  EndID,
-		Bills:  Bills,
-	}
-
-	// Serialize to bytes using Borsh
-	serializedData, err := borsh.Serialize(instructionData)
-	if err != nil {
-		// panic(err)
-		return nil, err
-	}
-
-	accounts := solana.AccountMetaSlice{}
-	for _, data_account := range data_accounts {
-		accounts = append(accounts, solana.NewAccountMeta(solana.MustPublicKeyFromBase58(data_account), true, false))
-	}
 	tx, err := solana.NewTransaction(
 		[]solana.Instruction{
 			solana.NewInstruction(
 				solana.MustPublicKeyFromBase58(ProgramID),
 				accounts,
-				serializedData, // data
+				instructionData, // data
 			),
 		},
 		recent.Value.Blockhash,
@@ -176,6 +162,60 @@ func SendTxFeeSettlement(rpcUrl string, data_accounts []string, FromId uint64, E
 	}
 	spew.Dump(sig)
 	return &sig, nil
+
+}
+
+func SendTxFeeSettlement(rpcUrl string, data_accounts []string, FromId uint64, EndID uint64, bills map[string]uint64) (*solana.Signature, error) {
+	Bills := []SettlementBillParam{}
+	// convert bills to []SettlementBillParam
+	for key, value := range bills {
+		Bills = append(Bills, SettlementBillParam{
+			Key:    solana.MustPublicKeyFromBase58(key),
+			Amount: value,
+		})
+	}
+
+	instructionData := SettleFeeBillParams{
+		Instruction: 0x8,
+		FromID:      FromId,
+		EndID:       EndID,
+		Bills:       Bills,
+	}
+
+	// Serialize to bytes using Borsh
+	serializedData, err := borsh.Serialize(instructionData)
+	if err != nil {
+		// panic(err)
+		return nil, err
+	}
+
+	accounts := solana.AccountMetaSlice{}
+	for _, data_account := range data_accounts {
+		accounts = append(accounts, solana.NewAccountMeta(solana.MustPublicKeyFromBase58(data_account), true, false))
+	}
+
+	return sendSonicTx(rpcUrl, accounts, serializedData)
+}
+
+func InitializeDataAccount(rpcUrl string, owner string, data_account string, account_type byte) (*solana.Signature, error) {
+	instructionData := InitializedParams{
+		Instruction: 0x1,
+		Owner:       solana.MustPublicKeyFromBase58(owner),
+		AccountType: account_type,
+	}
+
+	// Serialize to bytes using Borsh
+	serializedData, err := borsh.Serialize(instructionData)
+	if err != nil {
+		// panic(err)
+		return nil, err
+	}
+
+	accounts := solana.AccountMetaSlice{
+		solana.NewAccountMeta(solana.MustPublicKeyFromBase58(data_account), true, false),
+	}
+
+	return sendSonicTx(rpcUrl, accounts, serializedData)
 }
 
 // func main() {
