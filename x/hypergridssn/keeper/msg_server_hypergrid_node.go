@@ -104,6 +104,8 @@ func (k msgServer) DeleteHypergridNode(goCtx context.Context, msg *types.MsgDele
 		ctx,
 		msg.Pubkey,
 	)
+	// isFound := k.HasHypergridNode(ctx, msg.Pubkey)
+
 	if !isFound {
 		return nil, errorsmod.Wrap(sdkerrors.ErrKeyNotFound, "index not set")
 	}
