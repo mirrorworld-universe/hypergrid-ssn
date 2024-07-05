@@ -17,3 +17,5 @@ faucet:
 validators:
 - name: alice
   bonded: 100000000stake
+build:
+  main: ./cmd/hypergrid-ssnd/
