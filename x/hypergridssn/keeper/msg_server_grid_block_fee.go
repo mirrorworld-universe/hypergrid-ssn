@@ -22,6 +22,8 @@ func (k msgServer) CreateGridBlockFee(goCtx context.Context, msg *types.MsgCreat
 			Fee:       item.Fee,
 		}
 
+		//todo: make blockhash unique
+
 		id := k.AppendGridBlockFee(
 			ctx,
 			gridBlockFee,

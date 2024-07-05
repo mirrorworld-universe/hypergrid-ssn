@@ -83,12 +83,12 @@ func (s *SolanaClient) GetBlocks(start_slot uint64, limit uint64) ([]SolanaBlock
 		// Calculate the fee
 		for _, tx := range resp2.Transactions {
 			isVote := false
-			// for _, account := range tx.MustGetTransaction().Message.AccountKeys {
-			// 	if account.String() == "Vote111111111111111111111111111111111111111" {
-			// 		isVote = true
-			// 		break
-			// 	}
-			// }
+			for _, account := range tx.MustGetTransaction().Message.AccountKeys {
+				if account.String() == "Vote111111111111111111111111111111111111111" {
+					isVote = true
+					break
+				}
+			}
 			if isVote {
 				voteFee += tx.Meta.Fee
 			} else {
