@@ -40,6 +40,20 @@ func (k Keeper) GetHypergridNode(
 	return val, true
 }
 
+func (k Keeper) HasHypergridNode(
+	ctx context.Context,
+	pubkey string,
+
+) bool {
+	storeAdapter := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
+	store := prefix.NewStore(storeAdapter, types.KeyPrefix(types.HypergridNodeKeyPrefix))
+
+	b := store.Get(types.HypergridNodeKey(
+		pubkey,
+	))
+	return b != nil
+}
+
 // RemoveHypergridNode removes a hypergridNode from the store
 func (k Keeper) RemoveHypergridNode(
 	ctx context.Context,

@@ -98,13 +98,13 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				},
 				{
 					RpcMethod:      "CreateHypergridNode",
-					Use:            "create-hypergrid-node [pubkey] [name] [rpc] [data_account] [role] [starttime]",
+					Use:            "create-hypergrid-node [pubkey] [name] [rpc] [role] [data_account] [starttime]",
 					Short:          "Create a new HypergridNode",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "pubkey"}, {ProtoField: "name"}, {ProtoField: "rpc"}, {ProtoField: "role"}, {ProtoField: "data_account"}, {ProtoField: "starttime"}},
 				},
 				{
 					RpcMethod:      "UpdateHypergridNode",
-					Use:            "update-hypergrid-node [pubkey] [name] [rpc] [data_account] [role] [starttime]",
+					Use:            "update-hypergrid-node [pubkey] [name] [rpc] [role] [data_account] [starttime]",
 					Short:          "Update HypergridNode",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "pubkey"}, {ProtoField: "name"}, {ProtoField: "rpc"}, {ProtoField: "role"}, {ProtoField: "data_account"}, {ProtoField: "starttime"}},
 				},
