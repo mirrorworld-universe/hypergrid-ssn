@@ -51,6 +51,15 @@ func TestGenesis(t *testing.T) {
 			},
 		},
 		FeeSettlementBillCount: 2,
+		GridInboxList: []types.GridInbox{
+			{
+				Id: 0,
+			},
+			{
+				Id: 1,
+			},
+		},
+		GridInboxCount: 2,
 		// this line is used by starport scaffolding # genesis/test/state
 	}
 
@@ -68,5 +77,7 @@ func TestGenesis(t *testing.T) {
 	require.ElementsMatch(t, genesisState.HypergridNodeList, got.HypergridNodeList)
 	require.ElementsMatch(t, genesisState.FeeSettlementBillList, got.FeeSettlementBillList)
 	require.Equal(t, genesisState.FeeSettlementBillCount, got.FeeSettlementBillCount)
+	require.ElementsMatch(t, genesisState.GridInboxList, got.GridInboxList)
+	require.Equal(t, genesisState.GridInboxCount, got.GridInboxCount)
 	// this line is used by starport scaffolding # genesis/test/assert
 }

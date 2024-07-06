@@ -80,9 +80,10 @@ type InitializedParams struct {
 	AccountType byte
 }
 
-const ProgramID = "SonicFeeSet1ement11111111111111111111111111"
+const SonicFeeProgramID = "SonicFeeSet1ement11111111111111111111111111"
+const L1InboxProgramID = ""
 
-func sendSonicTx(rpcUrl string, accounts solana.AccountMetaSlice, instructionData []byte) (*solana.Signature, error) {
+func sendSonicTx(rpcUrl string, programId string, accounts solana.AccountMetaSlice, instructionData []byte) (*solana.Signature, error) {
 	// Create a new RPC client:
 	rpcClient := rpc.New(rpcUrl)
 
@@ -122,7 +123,7 @@ func sendSonicTx(rpcUrl string, accounts solana.AccountMetaSlice, instructionDat
 	tx, err := solana.NewTransaction(
 		[]solana.Instruction{
 			solana.NewInstruction(
-				solana.MustPublicKeyFromBase58(ProgramID),
+				solana.MustPublicKeyFromBase58(programId),
 				accounts,
 				instructionData, // data
 			),
@@ -194,7 +195,7 @@ func SendTxFeeSettlement(rpcUrl string, data_accounts []string, FromId uint64, E
 		accounts = append(accounts, solana.NewAccountMeta(solana.MustPublicKeyFromBase58(data_account), true, false))
 	}
 
-	return sendSonicTx(rpcUrl, accounts, serializedData)
+	return sendSonicTx(rpcUrl, SonicFeeProgramID, accounts, serializedData)
 }
 
 func InitializeDataAccount(rpcUrl string, owner string, data_account string, account_type byte) (*solana.Signature, error) {
@@ -215,7 +216,34 @@ func InitializeDataAccount(rpcUrl string, owner string, data_account string, acc
 		solana.NewAccountMeta(solana.MustPublicKeyFromBase58(data_account), true, false),
 	}
 
-	return sendSonicTx(rpcUrl, accounts, serializedData)
+	return sendSonicTx(rpcUrl, SonicFeeProgramID, accounts, serializedData)
+}
+
+type InboxProgrmParams struct {
+	Instruction uint32
+	Slot        uint64
+	Hash        string
+}
+
+func SendTxInbox(rpcUrl string, data_account string, slot uint64, hash string) (*solana.Signature, error) {
+	instructionData := InboxProgrmParams{
+		Instruction: 0x1,
+		Slot:        slot,
+		Hash:        hash,
+	}
+
+	// Serialize to bytes using Borsh
+	serializedData, err := borsh.Serialize(instructionData)
+	if err != nil {
+		// panic(err)
+		return nil, err
+	}
+
+	accounts := solana.AccountMetaSlice{
+		solana.NewAccountMeta(solana.MustPublicKeyFromBase58(data_account), true, false),
+	}
+
+	return sendSonicTx(rpcUrl, L1InboxProgramID, accounts, serializedData)
 }
 
 // func main() {

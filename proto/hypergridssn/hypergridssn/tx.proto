@@ -10,6 +10,7 @@ import "hypergridssn/hypergridssn/params.proto";
 import "hypergridssn/hypergridssn/grid_block_fee.proto";
 import "hypergridssn/hypergridssn/hypergrid_node.proto";
 import "hypergridssn/hypergridssn/fee_settlement_bill.proto";
+import "hypergridssn/hypergridssn/grid_inbox.proto";
 
 // import "hypergridssn/hypergridssn/solana_account.proto";
 
@@ -30,6 +31,7 @@ service Msg {
   rpc UpdateHypergridNode     (MsgUpdateHypergridNode    ) returns (MsgUpdateHypergridNodeResponse    );
   rpc DeleteHypergridNode     (MsgDeleteHypergridNode    ) returns (MsgDeleteHypergridNodeResponse    );
   rpc CreateFeeSettlementBill (MsgCreateFeeSettlementBill) returns (MsgCreateFeeSettlementBillResponse);
+  rpc CreateGridInbox         (MsgCreateGridInbox        ) returns (MsgCreateGridInboxResponse        );
 }
 // MsgUpdateParams is the Msg/UpdateParams request type.
 message MsgUpdateParams {
@@ -85,15 +87,16 @@ message MsgDeleteSolanaAccountResponse {}
 
 message GridBlockFeeItem {
   string grid      = 1;
-  string slot      = 2;     
+  string slot      = 2;
   string blockhash = 3;
-  int32 blocktime  = 4;
+  int32  blocktime = 4;
   string fee       = 5;
 }
 
 message MsgCreateGridBlockFee {
   option (cosmos.msg.v1.signer) = "creator";
-  string creator   = 1;
+  string creator = 1;
+  
   // string grid      = 2;
   // string slot      = 3;
   // string blockhash = 4;
@@ -108,26 +111,26 @@ message MsgCreateGridBlockFeeResponse {
 
 message MsgCreateHypergridNode {
   option (cosmos.msg.v1.signer) = "creator";
-  string creator   = 1;
-  string pubkey    = 2;
-  string name      = 3;
-  string rpc       = 4;
+  string creator      = 1;
+  string pubkey       = 2;
+  string name         = 3;
+  string rpc          = 4;
   string data_account = 5;
-  int32  role      = 6;
-  int32  starttime = 7;
+  int32  role         = 6;
+  int32  starttime    = 7;
 }
 
 message MsgCreateHypergridNodeResponse {}
 
 message MsgUpdateHypergridNode {
   option (cosmos.msg.v1.signer) = "creator";
-  string creator   = 1;
-  string pubkey    = 2;
-  string name      = 3;
-  string rpc       = 4;
+  string creator      = 1;
+  string pubkey       = 2;
+  string name         = 3;
+  string rpc          = 4;
   string data_account = 5;
-  int32  role      = 6;
-  int32  starttime = 7;
+  int32  role         = 6;
+  int32  starttime    = 7;
 }
 
 message MsgUpdateHypergridNodeResponse {}
@@ -143,11 +146,25 @@ message MsgDeleteHypergridNodeResponse {}
 message MsgCreateFeeSettlementBill {
   option (cosmos.msg.v1.signer) = "creator";
   string creator = 1;
-  uint64  fromId  = 2;
-  uint64  endId   = 3;
+  uint64 fromId  = 2;
+  uint64 endId   = 3;
 }
 
 message MsgCreateFeeSettlementBillResponse {
+  uint64 id     = 1;
+  string txhash = 2;
+}
+
+message MsgCreateGridInbox {
+  option (cosmos.msg.v1.signer) = "creator";
+  string creator = 1;
+  string grid    = 2;
+  string account = 3;
+  string slot    = 4;
+  string hash    = 5;
+}
+
+message MsgCreateGridInboxResponse {
   uint64 id = 1;
   string txhash = 2;
 }

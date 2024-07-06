@@ -27,6 +27,13 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 
 	// Set feeSettlementBill count
 	k.SetFeeSettlementBillCount(ctx, genState.FeeSettlementBillCount)
+	// Set all the gridInbox
+	for _, elem := range genState.GridInboxList {
+		k.SetGridInbox(ctx, elem)
+	}
+
+	// Set gridInbox count
+	k.SetGridInboxCount(ctx, genState.GridInboxCount)
 	// this line is used by starport scaffolding # genesis/module/init
 	if err := k.SetParams(ctx, genState.Params); err != nil {
 		panic(err)
@@ -44,6 +51,8 @@ func ExportGenesis(ctx sdk.Context, k keeper.Keeper) *types.GenesisState {
 	genesis.HypergridNodeList = k.GetAllHypergridNode(ctx)
 	genesis.FeeSettlementBillList = k.GetAllFeeSettlementBill(ctx)
 	genesis.FeeSettlementBillCount = k.GetFeeSettlementBillCount(ctx)
+	genesis.GridInboxList = k.GetAllGridInbox(ctx)
+	genesis.GridInboxCount = k.GetGridInboxCount(ctx)
 	// this line is used by starport scaffolding # genesis/module/export
 
 	return genesis

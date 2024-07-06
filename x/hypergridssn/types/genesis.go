@@ -14,6 +14,7 @@ func DefaultGenesis() *GenesisState {
 		GridBlockFeeList:      []GridBlockFee{},
 		HypergridNodeList:     []HypergridNode{},
 		FeeSettlementBillList: []FeeSettlementBill{},
+		GridInboxList:         []GridInbox{},
 		// this line is used by starport scaffolding # genesis/types/default
 		Params: DefaultParams(),
 	}
@@ -65,6 +66,18 @@ func (gs GenesisState) Validate() error {
 			return fmt.Errorf("feeSettlementBill id should be lower or equal than the last id")
 		}
 		feeSettlementBillIdMap[elem.Id] = true
+	}
+	// Check for duplicated ID in gridInbox
+	gridInboxIdMap := make(map[uint64]bool)
+	gridInboxCount := gs.GetGridInboxCount()
+	for _, elem := range gs.GridInboxList {
+		if _, ok := gridInboxIdMap[elem.Id]; ok {
+			return fmt.Errorf("duplicated id for gridInbox")
+		}
+		if elem.Id >= gridInboxCount {
+			return fmt.Errorf("gridInbox id should be lower or equal than the last id")
+		}
+		gridInboxIdMap[elem.Id] = true
 	}
 	// this line is used by starport scaffolding # genesis/types/validate
 

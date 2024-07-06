@@ -28,6 +28,7 @@ const (
 	Msg_UpdateHypergridNode_FullMethodName     = "/hypergridssn.hypergridssn.Msg/UpdateHypergridNode"
 	Msg_DeleteHypergridNode_FullMethodName     = "/hypergridssn.hypergridssn.Msg/DeleteHypergridNode"
 	Msg_CreateFeeSettlementBill_FullMethodName = "/hypergridssn.hypergridssn.Msg/CreateFeeSettlementBill"
+	Msg_CreateGridInbox_FullMethodName         = "/hypergridssn.hypergridssn.Msg/CreateGridInbox"
 )
 
 // MsgClient is the client API for Msg service.
@@ -45,6 +46,7 @@ type MsgClient interface {
 	UpdateHypergridNode(ctx context.Context, in *MsgUpdateHypergridNode, opts ...grpc.CallOption) (*MsgUpdateHypergridNodeResponse, error)
 	DeleteHypergridNode(ctx context.Context, in *MsgDeleteHypergridNode, opts ...grpc.CallOption) (*MsgDeleteHypergridNodeResponse, error)
 	CreateFeeSettlementBill(ctx context.Context, in *MsgCreateFeeSettlementBill, opts ...grpc.CallOption) (*MsgCreateFeeSettlementBillResponse, error)
+	CreateGridInbox(ctx context.Context, in *MsgCreateGridInbox, opts ...grpc.CallOption) (*MsgCreateGridInboxResponse, error)
 }
 
 type msgClient struct {
@@ -136,6 +138,15 @@ func (c *msgClient) CreateFeeSettlementBill(ctx context.Context, in *MsgCreateFe
 	return out, nil
 }
 
+func (c *msgClient) CreateGridInbox(ctx context.Context, in *MsgCreateGridInbox, opts ...grpc.CallOption) (*MsgCreateGridInboxResponse, error) {
+	out := new(MsgCreateGridInboxResponse)
+	err := c.cc.Invoke(ctx, Msg_CreateGridInbox_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MsgServer is the server API for Msg service.
 // All implementations must embed UnimplementedMsgServer
 // for forward compatibility
@@ -151,6 +162,7 @@ type MsgServer interface {
 	UpdateHypergridNode(context.Context, *MsgUpdateHypergridNode) (*MsgUpdateHypergridNodeResponse, error)
 	DeleteHypergridNode(context.Context, *MsgDeleteHypergridNode) (*MsgDeleteHypergridNodeResponse, error)
 	CreateFeeSettlementBill(context.Context, *MsgCreateFeeSettlementBill) (*MsgCreateFeeSettlementBillResponse, error)
+	CreateGridInbox(context.Context, *MsgCreateGridInbox) (*MsgCreateGridInboxResponse, error)
 	mustEmbedUnimplementedMsgServer()
 }
 
@@ -184,6 +196,9 @@ func (UnimplementedMsgServer) DeleteHypergridNode(context.Context, *MsgDeleteHyp
 }
 func (UnimplementedMsgServer) CreateFeeSettlementBill(context.Context, *MsgCreateFeeSettlementBill) (*MsgCreateFeeSettlementBillResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateFeeSettlementBill not implemented")
+}
+func (UnimplementedMsgServer) CreateGridInbox(context.Context, *MsgCreateGridInbox) (*MsgCreateGridInboxResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateGridInbox not implemented")
 }
 func (UnimplementedMsgServer) mustEmbedUnimplementedMsgServer() {}
 
@@ -360,6 +375,24 @@ func _Msg_CreateFeeSettlementBill_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Msg_CreateGridInbox_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgCreateGridInbox)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).CreateGridInbox(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Msg_CreateGridInbox_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).CreateGridInbox(ctx, req.(*MsgCreateGridInbox))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Msg_ServiceDesc is the grpc.ServiceDesc for Msg service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -402,6 +435,10 @@ var Msg_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateFeeSettlementBill",
 			Handler:    _Msg_CreateFeeSettlementBill_Handler,
+		},
+		{
+			MethodName: "CreateGridInbox",
+			Handler:    _Msg_CreateGridInbox_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

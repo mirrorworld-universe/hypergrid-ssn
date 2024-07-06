@@ -9,6 +9,7 @@ import "hypergridssn/hypergridssn/solana_account.proto";
 import "hypergridssn/hypergridssn/grid_block_fee.proto";
 import "hypergridssn/hypergridssn/hypergrid_node.proto";
 import "hypergridssn/hypergridssn/fee_settlement_bill.proto";
+import "hypergridssn/hypergridssn/grid_inbox.proto";
 
 option go_package = "hypergrid-ssn/x/hypergridssn/types";
 
@@ -16,12 +17,14 @@ option go_package = "hypergrid-ssn/x/hypergridssn/types";
 message GenesisState {
   
   // params defines all the parameters of the module.
-           Params            params                 = 1 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
-  repeated SolanaAccount     solanaAccountList      = 2 [(gogoproto.nullable) = false] ;
-  repeated GridBlockFee      gridBlockFeeList       = 5 [(gogoproto.nullable) = false] ;
-           uint64            gridBlockFeeCount      = 6;
-  repeated HypergridNode     hypergridNodeList      = 7 [(gogoproto.nullable) = false] ;
-  repeated FeeSettlementBill feeSettlementBillList  = 8 [(gogoproto.nullable) = false] ;
-           uint64            feeSettlementBillCount = 9;
+           Params            params                 =  1 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
+  repeated SolanaAccount     solanaAccountList      =  2 [(gogoproto.nullable) = false] ;
+  repeated GridBlockFee      gridBlockFeeList       =  5 [(gogoproto.nullable) = false] ;
+           uint64            gridBlockFeeCount      =  6;
+  repeated HypergridNode     hypergridNodeList      =  7 [(gogoproto.nullable) = false] ;
+  repeated FeeSettlementBill feeSettlementBillList  =  8 [(gogoproto.nullable) = false] ;
+           uint64            feeSettlementBillCount =  9;
+  repeated GridInbox         gridInboxList          = 10 [(gogoproto.nullable) = false] ;
+           uint64            gridInboxCount         = 11;
 }
 
