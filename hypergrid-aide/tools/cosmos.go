@@ -44,7 +44,6 @@ func (c *CosmosClient) SendGridBlockFees(account cosmosaccount.Account, gridId s
 	}
 	println("Account: ", address)
 
-	txResp := &cosmosclient.Response{}
 	items := []*types.GridBlockFeeItem{}
 	for _, block := range blocks {
 		item := types.GridBlockFeeItem{
@@ -57,6 +56,7 @@ func (c *CosmosClient) SendGridBlockFees(account cosmosaccount.Account, gridId s
 		items = append(items, &item)
 	}
 
+	txResp := cosmosclient.Response{}
 	if len(items) > 0 {
 		// Define a message to create a post
 		msg := &types.MsgCreateGridBlockFee{
@@ -75,7 +75,37 @@ func (c *CosmosClient) SendGridBlockFees(account cosmosaccount.Account, gridId s
 		fmt.Print("MsgCreateGridTxFee:\n\n")
 		fmt.Println(txResp)
 	}
-	return txResp, nil
+	return &txResp, nil
+}
+
+func (c *CosmosClient) SendGridInbox(account cosmosaccount.Account, gridId string, data_account string, block SolanaBlock) (*cosmosclient.Response, error) {
+	address, err := account.Address("cosmos")
+	if err != nil {
+		log.Fatal(err)
+	}
+	println("Account: ", address)
+
+	// Define a message to create a grid inbox
+	msg := types.MsgCreateGridInbox{
+		Creator: address,
+		Grid:    gridId,
+		Account: data_account,
+		Slot:    strconv.FormatUint(block.Slot, 10),
+		Hash:    block.Blockhash,
+	}
+
+	// Broadcast a transaction from account `alice` with the message
+	// to create a post store response in txResp
+	txResp, err := c.Client.BroadcastTx(c.Context, account, &msg)
+	if err != nil {
+		log.Fatal(err)
+		return nil, err
+	}
+	// Print response from broadcasting a transaction
+	fmt.Print("MsgCreateGridTxFee:\n\n")
+	fmt.Println(txResp)
+
+	return &txResp, nil
 }
 
 func (c *CosmosClient) QueryAllGridBlockFees() (*types.QueryAllGridBlockFeeResponse, error) {
