@@ -65,6 +65,14 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// block, err := solana.GetLastBlock()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// } else {
+	// 	println("Last block: ", block.Slot)
+
+	// }
+
 	last_sent_slot, err = tools.GetLastSentSlot()
 	if err != nil {
 		log.Fatal(err)
