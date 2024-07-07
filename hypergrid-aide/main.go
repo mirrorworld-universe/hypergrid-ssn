@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	"log"
 
 	//import solana.go
@@ -16,6 +18,16 @@ const SOLANA_RPC_ENDPOINT = "https://devnet1.sonic.game" //"http://localhost:889
 const COSMOS_RPC_ENDPOINT = "http://localhost:26657"
 const COSMOS_ADDRESS_PREFIX = "cosmos"
 const COSMOS_HOME = "/home/ubuntu/.hypergrid-ssn"
+
+const AIDE_GET_BLOCKS_COUNT_LIMIT = 10
+
+func CheckFileExist(fileName string) bool {
+	_, err := os.Stat(fileName)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return true
+}
 
 func main() {
 	println("Hypergrid Aide")
@@ -45,30 +57,45 @@ func main() {
 
 	gridId := resp.Identity.String()
 	println("Grid ID: ", gridId)
+	var last_sent_slot uint64
+	var first_available_slot uint64
 
-	blocks, err := solana.GetBlocks(7169128, 10)
+	first_available_slot, err = solana.GetFirstBlock()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Print response from querying all the posts
-	fmt.Print("\n\nAll blocks:\n\n")
-	fmt.Println(blocks)
-	println("Blocks: ", blocks)
-
-	address, err := account.Address(COSMOS_ADDRESS_PREFIX)
+	last_sent_slot, err = tools.GetLastSentSlot()
 	if err != nil {
 		log.Fatal(err)
 	}
-	println("Account: ", address)
-
+	start_slot := max(first_available_slot-1, last_sent_slot) + 1
+	println("last_sent_slot: ", start_slot)
+	blocks, err := solana.GetBlocks(start_slot, AIDE_GET_BLOCKS_COUNT_LIMIT)
+	println("last_sent_slot2: ", start_slot)
+	if err != nil {
+		println("GetBlocks fail")
+		log.Fatal(err)
+	}
+	println("blocks: ", len(blocks))
 	if len(blocks) > 0 {
-
+		println("SendGridBlockFees")
 		resp, err := cosmos.SendGridBlockFees(account, gridId, blocks)
 		if err != nil {
 			log.Fatal(err)
+			println("SendGridBlockFees fail")
+		} else {
+			println("SendGridBlockFees success")
+			last_sent_slot = blocks[len(blocks)-1].Slot
 		}
 		fmt.Print("MsgCreateGridTxFee:", resp)
+	} else {
+		last_sent_slot = start_slot + AIDE_GET_BLOCKS_COUNT_LIMIT - 1
+	}
+
+	_, err = tools.SetLastSentSlot(last_sent_slot)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	queryResp, err := cosmos.QueryAllGridBlockFees()
