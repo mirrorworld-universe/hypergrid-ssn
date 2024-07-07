@@ -63,6 +63,17 @@ func (s *SolanaClient) GetFirstBlock() (uint64, error) {
 	return 0, nil
 }
 
+func (s *SolanaClient) GetLastBlock() (uint64, error) {
+	// resp, err := s.Client.GetBlock()  .GetBlocksWithLimit(context.TODO(), 0, 1, rpc.CommitmentFinalized)
+	// if err != nil {
+	// 	return 0, err
+	// }
+	// if len(*resp) > 0 {
+	// 	return (*resp)[0], nil
+	// }
+	return 0, nil
+}
+
 func (s *SolanaClient) GetBlocks(start_slot uint64, limit uint64) ([]SolanaBlock, error) {
 	println("GetBlocks start_slot: ", start_slot)
 	resp, err := s.Client.GetBlocksWithLimit(context.TODO(), start_slot, limit, rpc.CommitmentFinalized)
