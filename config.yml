@@ -19,3 +19,4 @@ validators:
   bonded: 100000000stake
 build:
   main: ./cmd/hypergrid-ssnd/
+
