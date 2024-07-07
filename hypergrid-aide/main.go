@@ -10,6 +10,7 @@ import (
 	"hypergrid-aide/tools"
 
 	// Importing the general purpose Cosmos blockchain client
+	"github.com/ignite/cli/v28/ignite/pkg/cosmosaccount"
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
 	// Importing the types package of your blog blockchain
 )
@@ -23,57 +24,16 @@ const AIDE_GET_BLOCKS_COUNT_LIMIT = 10
 
 func CheckFileExist(fileName string) bool {
 	_, err := os.Stat(fileName)
-	if os.IsNotExist(err) {
-		return false
-	}
-	return true
+	return !os.IsNotExist(err)
 }
 
-func main() {
-	println("Hypergrid Aide")
-
-	cosmos := tools.NewCosmosClient(
-		cosmosclient.WithNodeAddress(COSMOS_RPC_ENDPOINT),
-		cosmosclient.WithAddressPrefix(COSMOS_ADDRESS_PREFIX),
-		cosmosclient.WithHome(COSMOS_HOME),
-		cosmosclient.WithGas("100000000"),
-	)
-
-	solana := tools.NewSolanaClient(SOLANA_RPC_ENDPOINT)
-
-	// Account `alice` was initialized during `ignite chain serve`
-	accountName := "alice" //my_validator"
-
-	// Get account from the keyring
-	account, err := cosmos.Account(accountName)
+func SendGridBlockFees(cosmos tools.CosmosClient, solana tools.SolanaClient, account cosmosaccount.Account, gridId string) {
+	first_available_slot, err := solana.GetFirstBlock()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	resp, err := solana.GetIdentity()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	gridId := resp.Identity.String()
-	println("Grid ID: ", gridId)
-	var last_sent_slot uint64
-	var first_available_slot uint64
-
-	first_available_slot, err = solana.GetFirstBlock()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// block, err := solana.GetLastBlock()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// } else {
-	// 	println("Last block: ", block.Slot)
-
-	// }
-
-	last_sent_slot, err = tools.GetLastSentSlot()
+	last_sent_slot, err := tools.GetLastSentSlot()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -119,4 +79,50 @@ func main() {
 	// Print response from querying all the posts
 	fmt.Print("\n\nAll grid tx fee:\n\n")
 	fmt.Println(queryResp)
+}
+
+func SendGridInbox(cosmos tools.CosmosClient, solana tools.SolanaClient, account cosmosaccount.Account, gridId string) {
+	block, err := solana.GetLastBlock()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	data_account := "data_account" //todo: get data_account for solana L1
+
+	cosmos.SendGridInbox(account, gridId, data_account, block)
+}
+
+func main() {
+	println("Hypergrid Aide")
+
+	cosmos := tools.NewCosmosClient(
+		cosmosclient.WithNodeAddress(COSMOS_RPC_ENDPOINT),
+		cosmosclient.WithAddressPrefix(COSMOS_ADDRESS_PREFIX),
+		cosmosclient.WithHome(COSMOS_HOME),
+		cosmosclient.WithGas("100000000"),
+	)
+
+	solana := tools.NewSolanaClient(SOLANA_RPC_ENDPOINT)
+
+	// Account `alice` was initialized during `ignite chain serve`
+	accountName := "alice" //my_validator"
+
+	// Get account from the keyring
+	account, err := cosmos.Account(accountName)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	resp, err := solana.GetIdentity()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	gridId := resp.Identity.String()
+	println("Grid ID: ", gridId)
+
+	SendGridBlockFees(*cosmos, *solana, account, gridId)
+
+	SendGridInbox(*cosmos, *solana, account, gridId)
+
 }
