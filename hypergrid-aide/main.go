@@ -80,22 +80,27 @@ func main() {
 	println("blocks: ", len(blocks))
 	if len(blocks) > 0 {
 		println("SendGridBlockFees")
-		resp, err := cosmos.SendGridBlockFees(account, gridId, blocks)
-		if err != nil {
-			log.Fatal(err)
+		resp, err_send := cosmos.SendGridBlockFees(account, gridId, blocks)
+		if err_send != nil {
+			log.Fatal(err_send)
 			println("SendGridBlockFees fail")
 		} else {
 			println("SendGridBlockFees success")
 			last_sent_slot = blocks[len(blocks)-1].Slot
+			_, err = tools.SetLastSentSlot(last_sent_slot)
+			if err != nil {
+				log.Fatal(err)
+			}
+
 		}
 		fmt.Print("MsgCreateGridTxFee:", resp)
 	} else {
 		last_sent_slot = start_slot + AIDE_GET_BLOCKS_COUNT_LIMIT - 1
-	}
+		_, err = tools.SetLastSentSlot(last_sent_slot)
+		if err != nil {
+			log.Fatal(err)
+		}
 
-	_, err = tools.SetLastSentSlot(last_sent_slot)
-	if err != nil {
-		log.Fatal(err)
 	}
 
 	queryResp, err := cosmos.QueryAllGridBlockFees()
