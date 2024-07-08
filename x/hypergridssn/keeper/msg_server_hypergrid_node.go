@@ -39,7 +39,7 @@ func (k msgServer) CreateHypergridNode(goCtx context.Context, msg *types.MsgCrea
 			return nil, errorsmod.Wrap(sdkerrors.ErrKeyNotFound, "sonic grid rpc not found")
 		}
 
-		sig, err := solana.InitializeDataAccount(sonic_grid_rpc, msg.Pubkey, msg.DataAccount, byte(msg.Role))
+		sig, err := solana.InitializeDataAccount(sonic_grid_rpc, msg.Pubkey, msg.DataAccount, uint32(msg.Role))
 		if err != nil {
 			return nil, errorsmod.Wrap(sdkerrors.ErrUnauthorized, err.Error())
 		}

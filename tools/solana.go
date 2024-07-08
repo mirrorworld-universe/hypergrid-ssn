@@ -2,6 +2,7 @@ package tools
 
 import (
 	"context"
+	"crypto/sha256"
 	"fmt"
 	"os"
 	"strings"
@@ -77,11 +78,11 @@ type SettleFeeBillParams struct {
 type InitializedParams struct {
 	Instruction uint32
 	Owner       solana.PublicKey
-	AccountType byte
+	AccountType uint32
 }
 
 const SonicFeeProgramID = "SonicFeeSet1ement11111111111111111111111111"
-const L1InboxProgramID = ""
+const L1InboxProgramID = "5XJ1wZkTwAw9mc5FbM3eBgAT83TKgtAGzKos9wVxC6my"
 
 func sendSonicTx(rpcUrl string, programId string, accounts solana.AccountMetaSlice, instructionData []byte) (*solana.Signature, error) {
 	// Create a new RPC client:
@@ -177,7 +178,7 @@ func SendTxFeeSettlement(rpcUrl string, data_accounts []string, FromId uint64, E
 	}
 
 	instructionData := SettleFeeBillParams{
-		Instruction: 0x8,
+		Instruction: 1,
 		FromID:      FromId,
 		EndID:       EndID,
 		Bills:       Bills,
@@ -198,9 +199,9 @@ func SendTxFeeSettlement(rpcUrl string, data_accounts []string, FromId uint64, E
 	return sendSonicTx(rpcUrl, SonicFeeProgramID, accounts, serializedData)
 }
 
-func InitializeDataAccount(rpcUrl string, owner string, data_account string, account_type byte) (*solana.Signature, error) {
+func InitializeDataAccount(rpcUrl string, owner string, data_account string, account_type uint32) (*solana.Signature, error) {
 	instructionData := InitializedParams{
-		Instruction: 0x1,
+		Instruction: 0,
 		Owner:       solana.MustPublicKeyFromBase58(owner),
 		AccountType: account_type,
 	}
@@ -220,14 +221,24 @@ func InitializeDataAccount(rpcUrl string, owner string, data_account string, acc
 }
 
 type InboxProgrmParams struct {
-	Instruction uint32
+	Instruction [8]byte
 	Slot        uint64
 	Hash        string
 }
 
+func hashInstructionMethod(method string) [8]byte {
+	hasher := sha256.New()
+	hasher.Write([]byte(fmt.Sprintf("global:%s", method)))
+	result := hasher.Sum(nil)
+
+	var hash [8]byte
+	copy(hash[:], result[:8])
+	return hash
+}
+
 func SendTxInbox(rpcUrl string, data_account string, slot uint64, hash string) (*solana.Signature, error) {
 	instructionData := InboxProgrmParams{
-		Instruction: 0x1,
+		Instruction: hashInstructionMethod("addblock"),
 		Slot:        slot,
 		Hash:        hash,
 	}
