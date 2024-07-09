@@ -3656,8 +3656,6 @@ paths:
                 type: string
               grid:
                 type: string
-              account:
-                type: string
               slot:
                 type: string
               hash:
@@ -6830,8 +6828,6 @@ definitions:
       creator:
         type: string
       grid:
-        type: string
-      account:
         type: string
       slot:
         type: string

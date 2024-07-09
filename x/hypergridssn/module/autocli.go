@@ -133,9 +133,9 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				},
 				{
 					RpcMethod:      "CreateGridInbox",
-					Use:            "create-grid-inbox [grid] [account] [slot] [hash]",
+					Use:            "create-grid-inbox [grid] [slot] [hash]",
 					Short:          "Create GridInbox",
-					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "grid"}, {ProtoField: "account"}, {ProtoField: "slot"}, {ProtoField: "hash"}},
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "grid"}, {ProtoField: "slot"}, {ProtoField: "hash"}},
 				},
 				// this line is used by ignite scaffolding # autocli/tx
 			},

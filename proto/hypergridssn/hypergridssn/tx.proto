@@ -159,9 +159,8 @@ message MsgCreateGridInbox {
   option (cosmos.msg.v1.signer) = "creator";
   string creator = 1;
   string grid    = 2;
-  string account = 3;
-  string slot    = 4;
-  string hash    = 5;
+  string slot    = 3;
+  string hash    = 4;
 }
 
 message MsgCreateGridInboxResponse {
