@@ -1,10 +1,11 @@
 package tools
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha256"
+	"encoding/binary"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/davecgh/go-spew/spew"
@@ -81,10 +82,65 @@ type InitializedParams struct {
 	AccountType uint32
 }
 
+// BorshEncode encodes the InstructionData using Borsh
+func (d *SettleFeeBillParams) BorshEncode() ([]byte, error) {
+	buf := new(bytes.Buffer)
+	err := binary.Write(buf, binary.LittleEndian, d.Instruction)
+	if err != nil {
+		return nil, err
+	}
+	err = binary.Write(buf, binary.LittleEndian, d.FromID)
+	if err != nil {
+		return nil, err
+	}
+	err = binary.Write(buf, binary.LittleEndian, d.EndID)
+	if err != nil {
+		return nil, err
+	}
+	billCount := uint64(len(d.Bills))
+	err = binary.Write(buf, binary.LittleEndian, billCount)
+	if err != nil {
+		return nil, err
+	}
+	for _, bill := range d.Bills {
+		err = binary.Write(buf, binary.LittleEndian, bill.Key[:])
+		if err != nil {
+			return nil, err
+		}
+		err = binary.Write(buf, binary.LittleEndian, bill.Amount)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return buf.Bytes(), nil
+}
+
 const SonicFeeProgramID = "SonicFeeSet1ement11111111111111111111111111"
 const L1InboxProgramID = "5XJ1wZkTwAw9mc5FbM3eBgAT83TKgtAGzKos9wVxC6my"
 
-func sendSonicTx(rpcUrl string, programId string, accounts solana.AccountMetaSlice, instructionData []byte) (*solana.Signature, error) {
+func getLocalPrivateKey() (solana.PrivateKey, error) {
+	//get home path "~/"
+	// home, err := os.UserHomeDir()
+	// if err != nil {
+	// 	// panic(err)
+	// 	return nil, err
+	// }
+	// Load the account that you will send funds FROM:
+	// accountFrom, err := solana.PrivateKeyFromSolanaKeygenFile(home + "/.config/solana/id.json")
+
+	// Load the account that you will send funds FROM:
+	accountFrom, err := solana.PrivateKeyFromBase58("5gA6JTpFziXu7py2j63arRUq1H29p6pcPMB74LaNuzcSqULPD6s1SZUS3UMPvFEE9oXmt1kk6ez3C6piTc3bwpJ6")
+	if err != nil {
+		// panic(err)
+		return nil, err
+	}
+	fmt.Println("accountFrom private key:", accountFrom)
+	fmt.Println("accountFrom public key:", accountFrom.PublicKey())
+
+	return accountFrom, nil
+}
+
+func sendSonicTx(rpcUrl string, programId string, accounts solana.AccountMetaSlice, instructionData []byte, signers []solana.PrivateKey) (*solana.Signature, error) {
 	// Create a new RPC client:
 	rpcClient := rpc.New(rpcUrl)
 
@@ -92,28 +148,13 @@ func sendSonicTx(rpcUrl string, programId string, accounts solana.AccountMetaSli
 	//replace http or https with ws
 	rpcWsUrl := strings.Replace(rpcUrl, "http://", "ws://", 1)
 	rpcWsUrl = strings.Replace(rpcWsUrl, "https://", "wss://", 1)
+	rpcWsUrl = strings.Replace(rpcWsUrl, ":8899", ":8900", 1)
 
 	wsClient, err := ws.Connect(context.Background(), rpcWsUrl)
 	if err != nil {
 		// panic(err)
 		return nil, err
 	}
-
-	//get home path "~/"
-	home, err := os.UserHomeDir()
-	if err != nil {
-		// panic(err)
-		return nil, err
-	}
-
-	// Load the account that you will send funds FROM:
-	accountFrom, err := solana.PrivateKeyFromSolanaKeygenFile(home + "/.config/solana/id.json")
-	if err != nil {
-		// panic(err)
-		return nil, err
-	}
-	fmt.Println("accountFrom private key:", accountFrom)
-	fmt.Println("accountFrom public key:", accountFrom.PublicKey())
 
 	recent, err := rpcClient.GetRecentBlockhash(context.TODO(), rpc.CommitmentFinalized)
 	if err != nil {
@@ -130,21 +171,25 @@ func sendSonicTx(rpcUrl string, programId string, accounts solana.AccountMetaSli
 			),
 		},
 		recent.Value.Blockhash,
-		solana.TransactionPayer(accountFrom.PublicKey()),
+		solana.TransactionPayer(signers[0].PublicKey()),
 	)
 	if err != nil {
 		// panic(err)
 		return nil, err
 	}
 
-	_, err = tx.Sign(
-		func(key solana.PublicKey) *solana.PrivateKey {
-			if accountFrom.PublicKey().Equals(key) {
-				return &accountFrom
+	_, err = tx.Sign(func(key solana.PublicKey) *solana.PrivateKey {
+		//check key is in signers
+		for _, signer := range signers {
+			if key.Equals(signer.PublicKey()) {
+				return &signer
 			}
-			return nil
-		},
-	)
+		}
+		// if accountFrom.PublicKey().Equals(key) {
+		// 	return &accountFrom
+		// }
+		return nil
+	})
 	if err != nil {
 		// panic(fmt.Errorf("unable to sign transaction: %w", err))
 		return nil, err
@@ -164,7 +209,6 @@ func sendSonicTx(rpcUrl string, programId string, accounts solana.AccountMetaSli
 	}
 	spew.Dump(sig)
 	return &sig, nil
-
 }
 
 func SendTxFeeSettlement(rpcUrl string, data_accounts []string, FromId uint64, EndID uint64, bills map[string]uint64) (*solana.Signature, error) {
@@ -185,7 +229,7 @@ func SendTxFeeSettlement(rpcUrl string, data_accounts []string, FromId uint64, E
 	}
 
 	// Serialize to bytes using Borsh
-	serializedData, err := borsh.Serialize(instructionData)
+	serializedData, err := instructionData.BorshEncode() // borsh.Serialize(instructionData)
 	if err != nil {
 		// panic(err)
 		return nil, err
@@ -195,8 +239,14 @@ func SendTxFeeSettlement(rpcUrl string, data_accounts []string, FromId uint64, E
 	for _, data_account := range data_accounts {
 		accounts = append(accounts, solana.NewAccountMeta(solana.MustPublicKeyFromBase58(data_account), true, false))
 	}
+	signer, err := getLocalPrivateKey()
+	if err != nil {
+		// panic(err)
+		return nil, err
+	}
 
-	return sendSonicTx(rpcUrl, SonicFeeProgramID, accounts, serializedData)
+	signers := []solana.PrivateKey{signer}
+	return sendSonicTx(rpcUrl, SonicFeeProgramID, accounts, serializedData, signers)
 }
 
 func InitializeDataAccount(rpcUrl string, owner string, data_account string, account_type uint32) (*solana.Signature, error) {
@@ -217,7 +267,14 @@ func InitializeDataAccount(rpcUrl string, owner string, data_account string, acc
 		solana.NewAccountMeta(solana.MustPublicKeyFromBase58(data_account), true, false),
 	}
 
-	return sendSonicTx(rpcUrl, SonicFeeProgramID, accounts, serializedData)
+	signer, err := getLocalPrivateKey()
+	if err != nil {
+		// panic(err)
+		return nil, err
+	}
+	signers := []solana.PrivateKey{signer}
+
+	return sendSonicTx(rpcUrl, SonicFeeProgramID, accounts, serializedData, signers)
 }
 
 type InboxProgrmParams struct {
@@ -236,7 +293,7 @@ func hashInstructionMethod(method string) [8]byte {
 	return hash
 }
 
-func SendTxInbox(rpcUrl string, data_account string, slot uint64, hash string) (*solana.Signature, error) {
+func SendTxInbox(rpcUrl string, slot uint64, hash string) (*solana.Signature, *solana.PublicKey, error) {
 	instructionData := InboxProgrmParams{
 		Instruction: hashInstructionMethod("addblock"),
 		Slot:        slot,
@@ -247,14 +304,40 @@ func SendTxInbox(rpcUrl string, data_account string, slot uint64, hash string) (
 	serializedData, err := borsh.Serialize(instructionData)
 	if err != nil {
 		// panic(err)
-		return nil, err
+		return nil, nil, err
+	}
+
+	//create a new keypair
+	data_account, err := solana.NewRandomPrivateKey()
+	if err != nil {
+		// panic(err)
+		return nil, nil, err
+	}
+	data_key := data_account.PublicKey()
+	fmt.Println("data_account:", data_key)
+
+	signer, err := getLocalPrivateKey()
+	if err != nil {
+		// panic(err)
+		return nil, nil, err
 	}
 
 	accounts := solana.AccountMetaSlice{
-		solana.NewAccountMeta(solana.MustPublicKeyFromBase58(data_account), true, false),
+		solana.NewAccountMeta(data_account.PublicKey(), true, true),
+		solana.NewAccountMeta(signer.PublicKey(), true, true),
+		solana.NewAccountMeta(solana.MustPublicKeyFromBase58("11111111111111111111111111111111"), false, false),
 	}
 
-	return sendSonicTx(rpcUrl, L1InboxProgramID, accounts, serializedData)
+	signers := []solana.PrivateKey{signer, data_account}
+
+	sig, err := sendSonicTx(rpcUrl, L1InboxProgramID, accounts, serializedData, signers)
+	if err != nil {
+		// panic(err)
+		return nil, nil, err
+	}
+	fmt.Println("signature: ", sig)
+
+	return sig, &data_key, nil
 }
 
 // func main() {

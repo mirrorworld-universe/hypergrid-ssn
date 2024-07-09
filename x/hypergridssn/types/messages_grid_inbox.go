@@ -8,13 +8,13 @@ import (
 
 var _ sdk.Msg = &MsgCreateGridInbox{}
 
-func NewMsgCreateGridInbox(creator string, grid string, account string, slot string, hash string) *MsgCreateGridInbox {
+func NewMsgCreateGridInbox(creator string, grid string, slot string, hash string) *MsgCreateGridInbox {
 	return &MsgCreateGridInbox{
 		Creator: creator,
 		Grid:    grid,
-		Account: account,
-		Slot:    slot,
-		Hash:    hash,
+		// Account: account,
+		Slot: slot,
+		Hash: hash,
 	}
 }
 

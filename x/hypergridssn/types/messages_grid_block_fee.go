@@ -8,15 +8,10 @@ import (
 
 var _ sdk.Msg = &MsgCreateGridBlockFee{}
 
-func NewMsgCreateGridBlockFee(creator string, items []*GridBlockFeeItem) *MsgCreateGridBlockFee { //grid string, slot string, blockhash string, blocktime int32, fee string) *MsgCreateGridBlockFee {
+func NewMsgCreateGridBlockFee(creator string, items []*GridBlockFeeItem) *MsgCreateGridBlockFee {
 	return &MsgCreateGridBlockFee{
 		Creator: creator,
-		// Grid:      grid,
-		// Slot:      slot,
-		// Blockhash: blockhash,
-		// Blocktime: blocktime,
-		// Fee:       fee,
-		Items: items,
+		Items:   items,
 	}
 }
 

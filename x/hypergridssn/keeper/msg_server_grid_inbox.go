@@ -34,7 +34,7 @@ func (k msgServer) CreateGridInbox(goCtx context.Context, msg *types.MsgCreateGr
 		return nil, errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "invalid slot")
 	}
 
-	sig, err := solana.SendTxInbox(base_layer_rpc, msg.Account, slot, msg.Hash)
+	sig, account, err := solana.SendTxInbox(base_layer_rpc, slot, msg.Hash)
 	if err != nil {
 		return nil, errorsmod.Wrap(sdkerrors.ErrUnauthorized, err.Error())
 	}
@@ -44,7 +44,7 @@ func (k msgServer) CreateGridInbox(goCtx context.Context, msg *types.MsgCreateGr
 	var gridInbox = types.GridInbox{
 		Creator: msg.Creator,
 		Grid:    msg.Grid,
-		Account: msg.Account,
+		Account: account.String(),
 		Slot:    msg.Slot,
 		Hash:    msg.Hash,
 	}
