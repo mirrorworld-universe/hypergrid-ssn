@@ -1056,6 +1056,7 @@ func (m *MsgCreateFeeSettlementBillResponse) GetTxhash() string {
 type MsgCreateGridInbox struct {
 	Creator string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
 	Grid    string `protobuf:"bytes,2,opt,name=grid,proto3" json:"grid,omitempty"`
+	Account string `protobuf:"bytes,3,opt,name=account,proto3" json:"account,omitempty"`
 	Slot    string `protobuf:"bytes,3,opt,name=slot,proto3" json:"slot,omitempty"`
 	Hash    string `protobuf:"bytes,4,opt,name=hash,proto3" json:"hash,omitempty"`
 }
