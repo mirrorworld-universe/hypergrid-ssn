@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
-
 	"log"
 
 	//import solana.go
@@ -21,11 +19,6 @@ const COSMOS_ADDRESS_PREFIX = "cosmos"
 const COSMOS_HOME = "/home/ubuntu/.hypergrid-ssn"
 
 const AIDE_GET_BLOCKS_COUNT_LIMIT = 10
-
-func CheckFileExist(fileName string) bool {
-	_, err := os.Stat(fileName)
-	return !os.IsNotExist(err)
-}
 
 func SendGridBlockFees(cosmos tools.CosmosClient, solana tools.SolanaClient, account cosmosaccount.Account, gridId string) {
 	first_available_slot, err := solana.GetFirstBlock()
