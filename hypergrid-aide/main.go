@@ -13,10 +13,11 @@ import (
 	// Importing the types package of your blog blockchain
 )
 
-const SOLANA_RPC_ENDPOINT = "https://devnet1.sonic.game" //"http://localhost:8899" //
-const COSMOS_RPC_ENDPOINT = "http://localhost:26657"
+const SOLANA_RPC_ENDPOINT = "http://localhost:8899" //"https://devnet1.sonic.game" //
+const COSMOS_RPC_ENDPOINT = "http://172.31.10.244:26657"
 const COSMOS_ADDRESS_PREFIX = "cosmos"
 const COSMOS_HOME = "/home/ubuntu/.hypergrid-ssn"
+const COSMOS_KEY = "my_key"
 
 const AIDE_GET_BLOCKS_COUNT_LIMIT = 10
 
@@ -80,42 +81,119 @@ func SendGridInbox(cosmos tools.CosmosClient, solana tools.SolanaClient, account
 		log.Fatal(err)
 	}
 
-	data_account := "data_account" //todo: get data_account for solana L1
+	cosmos.SendGridInbox(account, gridId, block)
+}
 
-	cosmos.SendGridInbox(account, gridId, data_account, block)
+func SyncStateAccount(cosmos tools.CosmosClient, account cosmosaccount.Account, source string, pubkey string) {
+	res, err := cosmos.SyncStateAccount(account, source, pubkey)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Print("SyncStateAccount:\n\n")
+	fmt.Println(res)
 }
 
 func main() {
-	println("Hypergrid Aide")
-
-	cosmos := tools.NewCosmosClient(
-		cosmosclient.WithNodeAddress(COSMOS_RPC_ENDPOINT),
-		cosmosclient.WithAddressPrefix(COSMOS_ADDRESS_PREFIX),
-		cosmosclient.WithHome(COSMOS_HOME),
-		cosmosclient.WithGas("100000000"),
-	)
-
-	solana := tools.NewSolanaClient(SOLANA_RPC_ENDPOINT)
-
-	// Account `alice` was initialized during `ignite chain serve`
-	accountName := "alice" //my_validator"
-
-	// Get account from the keyring
-	account, err := cosmos.Account(accountName)
-	if err != nil {
-		log.Fatal(err)
+	//get program arguments
+	args := os.Args
+	if len(args) < 2 {
+		fmt.Println("Usage: hypergrid-aide <command>")
+		os.Exit(1)
 	}
 
-	resp, err := solana.GetIdentity()
-	if err != nil {
-		log.Fatal(err)
+	command := args[1]
+	switch command {
+	case "sync":
+		if len(args) < 5 {
+			fmt.Println("Usage: hypergrid-aide sync <source> <pubkey>")
+			os.Exit(1)
+		}
+		source := args[2]
+		pubkey := args[3]
+		cosmos := tools.NewCosmosClient(
+			cosmosclient.WithNodeAddress(COSMOS_RPC_ENDPOINT),
+			cosmosclient.WithAddressPrefix(COSMOS_ADDRESS_PREFIX),
+			cosmosclient.WithHome(COSMOS_HOME),
+			cosmosclient.WithGas("100000000"),
+		)
+		account, err := cosmos.Account(COSMOS_KEY)
+		if err != nil {
+			log.Fatal(err)
+		}
+		SyncStateAccount(*cosmos, account, source, pubkey)
+		// break
+	case "inbox":
+		cosmos := tools.NewCosmosClient(
+			cosmosclient.WithNodeAddress(COSMOS_RPC_ENDPOINT),
+			cosmosclient.WithAddressPrefix(COSMOS_ADDRESS_PREFIX),
+			cosmosclient.WithHome(COSMOS_HOME),
+			cosmosclient.WithGas("100000000"),
+		)
+		solana := tools.NewSolanaClient(SOLANA_RPC_ENDPOINT)
+		account, err := cosmos.Account(COSMOS_KEY)
+		if err != nil {
+			log.Fatal(err)
+		}
+		resp, err := solana.GetIdentity()
+		if err != nil {
+			log.Fatal(err)
+		}
+		gridId := resp.Identity.String()
+		SendGridInbox(*cosmos, *solana, account, gridId)
+		// break
+	case "block":
+		cosmos := tools.NewCosmosClient(
+			cosmosclient.WithNodeAddress(COSMOS_RPC_ENDPOINT),
+			cosmosclient.WithAddressPrefix(COSMOS_ADDRESS_PREFIX),
+			cosmosclient.WithHome(COSMOS_HOME),
+			cosmosclient.WithGas("100000000"),
+		)
+		solana := tools.NewSolanaClient(SOLANA_RPC_ENDPOINT)
+		account, err := cosmos.Account(COSMOS_KEY)
+		if err != nil {
+			log.Fatal(err)
+		}
+		resp, err := solana.GetIdentity()
+		if err != nil {
+			log.Fatal(err)
+		}
+		gridId := resp.Identity.String()
+		SendGridBlockFees(*cosmos, *solana, account, gridId)
+		// break
+	default:
+		fmt.Println("Usage: hypergrid-aide <command>")
 	}
 
-	gridId := resp.Identity.String()
-	println("Grid ID: ", gridId)
+	// println("Hypergrid Aide")
 
-	SendGridBlockFees(*cosmos, *solana, account, gridId)
+	// cosmos := tools.NewCosmosClient(
+	// 	cosmosclient.WithNodeAddress(COSMOS_RPC_ENDPOINT),
+	// 	cosmosclient.WithAddressPrefix(COSMOS_ADDRESS_PREFIX),
+	// 	cosmosclient.WithHome(COSMOS_HOME),
+	// 	cosmosclient.WithGas("100000000"),
+	// )
 
-	SendGridInbox(*cosmos, *solana, account, gridId)
+	// solana := tools.NewSolanaClient(SOLANA_RPC_ENDPOINT)
+
+	// // Account `alice` was initialized during `ignite chain serve`
+	// accountName := COSMOS_KEY
+
+	// // Get account from the keyring
+	// account, err := cosmos.Account(accountName)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	// resp, err := solana.GetIdentity()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	// gridId := resp.Identity.String()
+	// println("Grid ID: ", gridId)
+
+	// SendGridBlockFees(*cosmos, *solana, account, gridId)
+
+	// SendGridInbox(*cosmos, *solana, account, gridId)
 
 }
