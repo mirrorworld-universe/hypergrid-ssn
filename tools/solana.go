@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/binary"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/davecgh/go-spew/spew"
@@ -139,16 +140,16 @@ const L1InboxProgramID = "5XJ1wZkTwAw9mc5FbM3eBgAT83TKgtAGzKos9wVxC6my"
 
 func getLocalPrivateKey() (solana.PrivateKey, error) {
 	//get home path "~/"
-	// home, err := os.UserHomeDir()
-	// if err != nil {
-	// 	// panic(err)
-	// 	return nil, err
-	// }
+	home, err := os.UserHomeDir()
+	if err != nil {
+		// panic(err)
+		return nil, err
+	}
 	// Load the account that you will send funds FROM:
-	// accountFrom, err := solana.PrivateKeyFromSolanaKeygenFile(home + "/.config/solana/id.json")
+	accountFrom, err := solana.PrivateKeyFromSolanaKeygenFile(home + "/.config/solana/id.json")
 
 	// Load the account that you will send funds FROM:
-	accountFrom, err := solana.PrivateKeyFromBase58("5gA6JTpFziXu7py2j63arRUq1H29p6pcPMB74LaNuzcSqULPD6s1SZUS3UMPvFEE9oXmt1kk6ez3C6piTc3bwpJ6")
+	// accountFrom, err := solana.PrivateKeyFromBase58("5gA6JTpFziXu7py2j63arRUq1H29p6pcPMB74LaNuzcSqULPD6s1SZUS3UMPvFEE9oXmt1kk6ez3C6piTc3bwpJ6")
 	if err != nil {
 		// panic(err)
 		return nil, err
