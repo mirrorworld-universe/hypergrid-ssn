@@ -11,9 +11,16 @@ import (
 const AIDE_CONFIG_FILE = "/home/ubuntu/.hypergrid-ssn/last_slot.txt"
 
 func CheckFileExist(fileName string) bool {
+	// chech file exist
 	_, err := os.Stat(fileName)
-	return !os.IsNotExist(err)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false
+		}
+	}
+	return true
 }
+
 func GetLastSentSlot() (uint64, error) {
 	if CheckFileExist(AIDE_CONFIG_FILE) {
 		var f *os.File
@@ -36,12 +43,15 @@ func GetLastSentSlot() (uint64, error) {
 			return 0, err
 
 		}
+		fmt.Println("read last_sent_slot: ", last_sent_slot)
 		return last_sent_slot, nil
 	}
+	fmt.Println("file not exist")
 	return 0, nil
 }
 
 func SetLastSentSlot(slot uint64) (bool, error) {
+	fmt.Println("SetLastSentSlot: ", slot)
 	if !CheckFileExist(AIDE_CONFIG_FILE) {
 
 		f, err := os.Create(AIDE_CONFIG_FILE)

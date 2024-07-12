@@ -20,22 +20,29 @@ const COSMOS_ADDRESS_PREFIX = "cosmos"
 const COSMOS_HOME = "/home/ubuntu/.hypergrid-ssn"
 const COSMOS_KEY = "my_key"
 
-const AIDE_GET_BLOCKS_COUNT_LIMIT = 10
+const AIDE_GET_BLOCKS_COUNT_LIMIT = 200
 
 func SendGridBlockFees(cosmos tools.CosmosClient, solana tools.SolanaClient, account cosmosaccount.Account, gridId string) {
 	first_available_slot, err := solana.GetFirstBlock()
 	if err != nil {
 		log.Fatal(err)
 	}
+	fmt.Println("first_available_slot: ", first_available_slot)
 
 	last_sent_slot, err := tools.GetLastSentSlot()
 	if err != nil {
 		log.Fatal(err)
 	}
-	start_slot := max(first_available_slot-1, last_sent_slot) + 1
-	println("last_sent_slot: ", start_slot)
+	fmt.Println("*last_sent_slot: ", last_sent_slot)
+	//choose the max of last_sent_slot and first_available_slot - 1
+	start_slot := last_sent_slot + 1
+	if last_sent_slot < first_available_slot {
+		start_slot = first_available_slot
+	}
+
+	println("start_slot: ", start_slot)
 	blocks, err := solana.GetBlocks(start_slot, AIDE_GET_BLOCKS_COUNT_LIMIT)
-	println("last_sent_slot2: ", start_slot)
+	println("start_slot2: ", start_slot)
 	if err != nil {
 		println("GetBlocks fail")
 		log.Fatal(err)
@@ -66,14 +73,14 @@ func SendGridBlockFees(cosmos tools.CosmosClient, solana tools.SolanaClient, acc
 
 	}
 
-	queryResp, err := cosmos.QueryAllGridBlockFees()
-	if err != nil {
-		log.Fatal(err)
-	}
+	// queryResp, err := cosmos.QueryAllGridBlockFees()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	// Print response from querying all the posts
-	fmt.Print("\n\nAll grid tx fee:\n\n")
-	fmt.Println(queryResp)
+	// // Print response from querying all the posts
+	// fmt.Print("\n\nAll grid tx fee:\n\n")
+	// fmt.Println(queryResp)
 }
 
 func SendGridInbox(cosmos tools.CosmosClient, solana tools.SolanaClient, account cosmosaccount.Account, gridId string) {
