@@ -58,7 +58,6 @@ func (c *CosmosClient) SendGridBlockFees(account cosmosaccount.Account, gridId s
 		items = append(items, &item)
 	}
 
-	txResp := cosmosclient.Response{}
 	if len(items) > 0 {
 		// Define a message to create a post
 		msg := &types.MsgCreateGridBlockFee{
@@ -76,8 +75,9 @@ func (c *CosmosClient) SendGridBlockFees(account cosmosaccount.Account, gridId s
 		// Print response from broadcasting a transaction
 		fmt.Print("MsgCreateGridTxFee:\n\n")
 		fmt.Println(txResp)
+		return &txResp, nil
 	}
-	return &txResp, nil
+	return nil, nil
 }
 
 func (c *CosmosClient) SendGridInbox(account cosmosaccount.Account, gridId string, block SolanaBlock) (*cosmosclient.Response, error) {
