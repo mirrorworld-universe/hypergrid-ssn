@@ -13,6 +13,8 @@ import (
 	// Importing the types package of your blog blockchain
 )
 
+const COSMOS_ADDRESS_PREFIX = "cosmos"
+
 type CosmosClient struct {
 	Context context.Context
 	Client  cosmosclient.Client
@@ -38,7 +40,7 @@ func (c *CosmosClient) Account(name string) (cosmosaccount.Account, error) {
 }
 
 func (c *CosmosClient) SendGridBlockFees(account cosmosaccount.Account, gridId string, blocks []SolanaBlock) (*cosmosclient.Response, error) {
-	address, err := account.Address("cosmos")
+	address, err := account.Address(COSMOS_ADDRESS_PREFIX)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -78,8 +80,8 @@ func (c *CosmosClient) SendGridBlockFees(account cosmosaccount.Account, gridId s
 	return &txResp, nil
 }
 
-func (c *CosmosClient) SendGridInbox(account cosmosaccount.Account, gridId string, data_account string, block SolanaBlock) (*cosmosclient.Response, error) {
-	address, err := account.Address("cosmos")
+func (c *CosmosClient) SendGridInbox(account cosmosaccount.Account, gridId string, block SolanaBlock) (*cosmosclient.Response, error) {
+	address, err := account.Address(COSMOS_ADDRESS_PREFIX)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -89,7 +91,6 @@ func (c *CosmosClient) SendGridInbox(account cosmosaccount.Account, gridId strin
 	msg := types.MsgCreateGridInbox{
 		Creator: address,
 		Grid:    gridId,
-		Account: data_account,
 		Slot:    strconv.FormatUint(block.Slot, 10),
 		Hash:    block.Blockhash,
 	}
@@ -103,6 +104,35 @@ func (c *CosmosClient) SendGridInbox(account cosmosaccount.Account, gridId strin
 	}
 	// Print response from broadcasting a transaction
 	fmt.Print("MsgCreateGridTxFee:\n\n")
+	fmt.Println(txResp)
+
+	return &txResp, nil
+}
+
+func (c *CosmosClient) SyncStateAccount(account cosmosaccount.Account, source string, pubkey string) (*cosmosclient.Response, error) {
+	address, err := account.Address(COSMOS_ADDRESS_PREFIX)
+	if err != nil {
+		log.Fatal(err)
+	}
+	println("Account: ", address)
+
+	// Define a message to create a grid inbox
+	msg := types.MsgCreateSolanaAccount{
+		Creator: address,
+		Address: pubkey,
+		Version: "0",
+		Source:  source,
+	}
+
+	// Broadcast a transaction from account `alice` with the message
+	// to create a post store response in txResp
+	txResp, err := c.Client.BroadcastTx(c.Context, account, &msg)
+	if err != nil {
+		log.Fatal(err)
+		return nil, err
+	}
+	// Print response from broadcasting a transaction
+	fmt.Print("MsgCreateSolanaAccount:\n\n")
 	fmt.Println(txResp)
 
 	return &txResp, nil

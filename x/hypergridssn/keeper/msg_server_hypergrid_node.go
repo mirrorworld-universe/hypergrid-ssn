@@ -5,8 +5,6 @@ import (
 
 	"hypergrid-ssn/x/hypergridssn/types"
 
-	solana "hypergrid-ssn/tools"
-
 	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -24,28 +22,28 @@ func (k msgServer) CreateHypergridNode(goCtx context.Context, msg *types.MsgCrea
 		return nil, errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "index already set")
 	}
 
-	if msg.Role == 3 { //grid node
-		sonic_grid_rpc := ""
-		nodes := k.GetAllHypergridNode(goCtx)
-		for _, node := range nodes {
-			// get sonic grid node from the list
-			if node.Role == 2 {
-				sonic_grid_rpc = node.Rpc
-				break
-			}
-		}
+	// if msg.Role == 3 { //grid node
+	// 	sonic_grid_rpc := ""
+	// 	nodes := k.GetAllHypergridNode(goCtx)
+	// 	for _, node := range nodes {
+	// 		// get sonic grid node from the list
+	// 		if node.Role == 2 {
+	// 			sonic_grid_rpc = node.Rpc
+	// 			break
+	// 		}
+	// 	}
 
-		if sonic_grid_rpc == "" {
-			return nil, errorsmod.Wrap(sdkerrors.ErrKeyNotFound, "sonic grid rpc not found")
-		}
+	// 	if sonic_grid_rpc == "" {
+	// 		return nil, errorsmod.Wrap(sdkerrors.ErrKeyNotFound, "sonic grid rpc not found")
+	// 	}
 
-		sig, err := solana.InitializeDataAccount(sonic_grid_rpc, msg.Pubkey, msg.DataAccount, uint32(msg.Role))
-		if err != nil {
-			return nil, errorsmod.Wrap(sdkerrors.ErrUnauthorized, err.Error())
-		}
+	// 	sig, err := solana.InitializeDataAccount(sonic_grid_rpc, msg.Pubkey, msg.DataAccount, uint32(msg.Role))
+	// 	if err != nil {
+	// 		return nil, errorsmod.Wrap(sdkerrors.ErrUnauthorized, err.Error())
+	// 	}
 
-		println("signature: ", sig)
-	}
+	// 	println("signature: ", sig)
+	// }
 
 	var hypergridNode = types.HypergridNode{
 		Creator:     msg.Creator,

@@ -115,6 +115,25 @@ func (d *SettleFeeBillParams) BorshEncode() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+// BorshEncode encodes the InstructionData using Borsh
+func (d *InitializedParams) BorshEncode() ([]byte, error) {
+	buf := new(bytes.Buffer)
+	err := binary.Write(buf, binary.LittleEndian, d.Instruction)
+	if err != nil {
+		return nil, err
+	}
+	err = binary.Write(buf, binary.LittleEndian, d.Owner.Bytes())
+	if err != nil {
+		return nil, err
+	}
+	err = binary.Write(buf, binary.LittleEndian, d.AccountType)
+	if err != nil {
+		return nil, err
+	}
+
+	return buf.Bytes(), nil
+}
+
 const SonicFeeProgramID = "SonicFeeSet1ement11111111111111111111111111"
 const L1InboxProgramID = "5XJ1wZkTwAw9mc5FbM3eBgAT83TKgtAGzKos9wVxC6my"
 
@@ -257,7 +276,7 @@ func InitializeDataAccount(rpcUrl string, owner string, data_account string, acc
 	}
 
 	// Serialize to bytes using Borsh
-	serializedData, err := borsh.Serialize(instructionData)
+	serializedData, err := instructionData.BorshEncode()
 	if err != nil {
 		// panic(err)
 		return nil, err
