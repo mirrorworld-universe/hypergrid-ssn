@@ -57,11 +57,6 @@ func (k msgServer) CreateFeeSettlementBill(goCtx context.Context, msg *types.Msg
 		Status:  0,
 	}
 
-	id := k.AppendFeeSettlementBill(
-		ctx,
-		feeSettlementBill,
-	)
-
 	//todo: call sonic grid to settle the fee
 	// get sonic grid node
 	sonic_grid_rpc := ""
@@ -86,7 +81,12 @@ func (k msgServer) CreateFeeSettlementBill(goCtx context.Context, msg *types.Msg
 		return nil, errorsmod.Wrap(sdkerrors.ErrUnauthorized, err.Error())
 	}
 
-	println("signature: ", sig)
+	println("solana signature: ", sig.String())
+
+	id := k.AppendFeeSettlementBill(
+		ctx,
+		feeSettlementBill,
+	)
 
 	return &types.MsgCreateFeeSettlementBillResponse{
 		Id:     id,
