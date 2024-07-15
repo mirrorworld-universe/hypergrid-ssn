@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 
 	//import solana.go
 	"hypergrid-aide/tools"
@@ -17,12 +18,13 @@ import (
 const SOLANA_RPC_ENDPOINT = "http://localhost:8899" //"https://devnet1.sonic.game" //
 const COSMOS_RPC_ENDPOINT = "http://172.31.10.244:26657"
 const COSMOS_ADDRESS_PREFIX = "cosmos"
-const COSMOS_HOME = "/home/ubuntu/.hypergrid-ssn"
+const COSMOS_HOME = ".hypergrid-ssn"
 const COSMOS_KEY = "my_key"
+const COSMOS_GAS = "100000000"
 
-const AIDE_GET_BLOCKS_COUNT_LIMIT = 200
+const AIDE_GET_BLOCKS_COUNT_LIMIT = uint64(200)
 
-func SendGridBlockFees(cosmos tools.CosmosClient, solana tools.SolanaClient, account cosmosaccount.Account, gridId string) {
+func SendGridBlockFees(cosmos tools.CosmosClient, solana tools.SolanaClient, account cosmosaccount.Account, gridId string, limit uint64) {
 	first_available_slot, err := solana.GetFirstBlock()
 	if err != nil {
 		log.Fatal(err)
@@ -33,30 +35,30 @@ func SendGridBlockFees(cosmos tools.CosmosClient, solana tools.SolanaClient, acc
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("*last_sent_slot: ", last_sent_slot)
+	fmt.Println("last_sent_slot: ", last_sent_slot)
 	//choose the max of last_sent_slot and first_available_slot - 1
 	start_slot := last_sent_slot + 1
 	if last_sent_slot < first_available_slot {
 		start_slot = first_available_slot
 	}
 
-	println("start_slot: ", start_slot)
-	blocks, err := solana.GetBlocks(start_slot, AIDE_GET_BLOCKS_COUNT_LIMIT)
-	println("start_slot2: ", start_slot)
+	fmt.Println("start_slot: ", start_slot)
+	blocks, latest_slot, err := solana.GetBlocks(start_slot, limit)
+	fmt.Println("start_slot2: ", start_slot)
 	if err != nil {
-		println("GetBlocks fail")
+		fmt.Println("GetBlocks fail")
 		log.Fatal(err)
 	}
-	println("blocks: ", len(blocks))
+	fmt.Println("blocks: ", len(blocks))
 	if len(blocks) > 0 {
-		println("SendGridBlockFees")
+		fmt.Println("SendGridBlockFees")
 		resp, err_send := cosmos.SendGridBlockFees(account, gridId, blocks)
 		if err_send != nil {
 			log.Fatal(err_send)
-			println("SendGridBlockFees fail")
+			fmt.Println("SendGridBlockFees fail")
 		} else {
-			println("SendGridBlockFees success")
-			last_sent_slot = blocks[len(blocks)-1].Slot
+			fmt.Println("SendGridBlockFees success")
+			last_sent_slot = latest_slot //blocks[len(blocks)-1].Slot
 			_, err = tools.SetLastSentSlot(last_sent_slot)
 			if err != nil {
 				log.Fatal(err)
@@ -65,7 +67,7 @@ func SendGridBlockFees(cosmos tools.CosmosClient, solana tools.SolanaClient, acc
 		}
 		fmt.Print("MsgCreateGridTxFee:", resp)
 	} else {
-		last_sent_slot = start_slot + AIDE_GET_BLOCKS_COUNT_LIMIT - 1
+		last_sent_slot = latest_slot
 		_, err = tools.SetLastSentSlot(last_sent_slot)
 		if err != nil {
 			log.Fatal(err)
@@ -109,6 +111,12 @@ func main() {
 		os.Exit(1)
 	}
 
+	home, err := os.UserHomeDir()
+	if err != nil {
+		panic(err)
+		// os.Exit(1)
+	}
+
 	command := args[1]
 	switch command {
 	case "sync":
@@ -121,8 +129,8 @@ func main() {
 		cosmos := tools.NewCosmosClient(
 			cosmosclient.WithNodeAddress(COSMOS_RPC_ENDPOINT),
 			cosmosclient.WithAddressPrefix(COSMOS_ADDRESS_PREFIX),
-			cosmosclient.WithHome(COSMOS_HOME),
-			cosmosclient.WithGas("100000000"),
+			cosmosclient.WithHome(home+"/"+COSMOS_HOME),
+			cosmosclient.WithGas(COSMOS_GAS),
 		)
 		account, err := cosmos.Account(COSMOS_KEY)
 		if err != nil {
@@ -134,8 +142,8 @@ func main() {
 		cosmos := tools.NewCosmosClient(
 			cosmosclient.WithNodeAddress(COSMOS_RPC_ENDPOINT),
 			cosmosclient.WithAddressPrefix(COSMOS_ADDRESS_PREFIX),
-			cosmosclient.WithHome(COSMOS_HOME),
-			cosmosclient.WithGas("100000000"),
+			cosmosclient.WithHome(home+"/"+COSMOS_HOME),
+			cosmosclient.WithGas(COSMOS_GAS),
 		)
 		solana := tools.NewSolanaClient(SOLANA_RPC_ENDPOINT)
 		account, err := cosmos.Account(COSMOS_KEY)
@@ -150,11 +158,20 @@ func main() {
 		SendGridInbox(*cosmos, *solana, account, gridId)
 		// break
 	case "block":
+		limit := AIDE_GET_BLOCKS_COUNT_LIMIT
+		if len(args) > 2 {
+			//convert string to uint64
+			limit_int, err := strconv.ParseUint(args[2], 10, 64)
+			if err != nil {
+				log.Fatal(err)
+			}
+			limit = limit_int
+		}
 		cosmos := tools.NewCosmosClient(
 			cosmosclient.WithNodeAddress(COSMOS_RPC_ENDPOINT),
 			cosmosclient.WithAddressPrefix(COSMOS_ADDRESS_PREFIX),
-			cosmosclient.WithHome(COSMOS_HOME),
-			cosmosclient.WithGas("100000000"),
+			cosmosclient.WithHome(home+"/"+COSMOS_HOME),
+			cosmosclient.WithGas(COSMOS_GAS),
 		)
 		solana := tools.NewSolanaClient(SOLANA_RPC_ENDPOINT)
 		account, err := cosmos.Account(COSMOS_KEY)
@@ -166,13 +183,13 @@ func main() {
 			log.Fatal(err)
 		}
 		gridId := resp.Identity.String()
-		SendGridBlockFees(*cosmos, *solana, account, gridId)
+		SendGridBlockFees(*cosmos, *solana, account, gridId, limit)
 		// break
 	default:
 		fmt.Println("Usage: hypergrid-aide <command>")
 	}
 
-	// println("Hypergrid Aide")
+	// fmt.Println("Hypergrid Aide")
 
 	// cosmos := tools.NewCosmosClient(
 	// 	cosmosclient.WithNodeAddress(COSMOS_RPC_ENDPOINT),
@@ -198,7 +215,7 @@ func main() {
 	// }
 
 	// gridId := resp.Identity.String()
-	// println("Grid ID: ", gridId)
+	// fmt.Println("Grid ID: ", gridId)
 
 	// SendGridBlockFees(*cosmos, *solana, account, gridId)
 
