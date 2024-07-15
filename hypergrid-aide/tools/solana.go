@@ -29,7 +29,7 @@ type SolanaClient struct {
 }
 
 func NewSolanaClient(endpoint string) *SolanaClient {
-	println("NewSolanaClient")
+	fmt.Println("NewSolanaClient")
 	return &SolanaClient{
 		Endpoint: endpoint,
 		Client:   rpc.New(endpoint),
@@ -83,19 +83,21 @@ func (s *SolanaClient) GetLastBlock() (SolanaBlock, error) {
 
 }
 
-func (s *SolanaClient) GetBlocks(start_slot uint64, limit uint64) ([]SolanaBlock, error) {
-	println("GetBlocks start_slot: ", start_slot)
+func (s *SolanaClient) GetBlocks(start_slot uint64, limit uint64) ([]SolanaBlock, uint64, error) {
+	fmt.Println("GetBlocks start_slot: ", start_slot)
 	resp, err := s.Client.GetBlocksWithLimit(context.TODO(), start_slot, limit, rpc.CommitmentFinalized)
 
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	// Get the blocks
 	blocks := []SolanaBlock{}
 	rewards := true
+	latest_slot := uint64(0)
 	for _, block := range *resp {
-		println("block: ", block)
+		fmt.Println("block: ", block)
+		latest_slot = block
 		resp2, err := s.Client.GetBlockWithOpts(context.TODO(), block, &rpc.GetBlockOpts{
 			// Encoding:           solana.EncodingJSONParsed,
 			Commitment:         rpc.CommitmentFinalized,
@@ -103,11 +105,11 @@ func (s *SolanaClient) GetBlocks(start_slot uint64, limit uint64) ([]SolanaBlock
 			Rewards:            &rewards,
 		})
 		if err != nil {
-			println("error: ", err.Error())
+			fmt.Println("error: ", err.Error())
 			continue
 		}
 
-		println("blockhash: ", resp2.Blockhash.String())
+		fmt.Println("blockhash: ", resp2.Blockhash.String())
 
 		Fee := uint64(0)
 		voteFee := uint64(0)
@@ -147,7 +149,7 @@ func (s *SolanaClient) GetBlocks(start_slot uint64, limit uint64) ([]SolanaBlock
 	}
 
 	// Get the identity
-	return blocks, nil
+	return blocks, latest_slot, nil
 }
 
 func (s *SolanaClient) GetAccountInfo(address string) (*rpc.GetAccountInfoResult, error) {
@@ -227,7 +229,7 @@ func (s *SolanaClient) SendTransaction(programID string) (*solana.Signature, err
 		},
 	)
 	if err != nil {
-		println(fmt.Errorf("unable to sign transaction: %w", err))
+		fmt.Println(fmt.Errorf("unable to sign transaction: %w", err))
 		return nil, err
 	}
 	spew.Dump(tx)
@@ -247,7 +249,7 @@ func (s *SolanaClient) SendTransaction(programID string) (*solana.Signature, err
 func (s *SolanaClient) GetTransaction(signature string) (*rpc.GetTransactionResult, error) {
 	txhash, err := solana.SignatureFromBase58(signature)
 	if err != nil {
-		println(fmt.Errorf("unable to sign transaction: %w", err))
+		fmt.Println(fmt.Errorf("unable to sign transaction: %w", err))
 		return nil, err
 	}
 	return s.Client.GetTransaction(context.TODO(), txhash, &rpc.GetTransactionOpts{

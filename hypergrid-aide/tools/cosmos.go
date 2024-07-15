@@ -21,7 +21,7 @@ type CosmosClient struct {
 }
 
 func NewCosmosClient(options ...cosmosclient.Option) *CosmosClient {
-	println("NewCosmosClient")
+	fmt.Println("NewCosmosClient")
 	// Create a Cosmos client instance
 	ctx := context.Background()
 	cosmos, err := cosmosclient.New(ctx, options...)
@@ -44,7 +44,7 @@ func (c *CosmosClient) SendGridBlockFees(account cosmosaccount.Account, gridId s
 	if err != nil {
 		log.Fatal(err)
 	}
-	println("Account: ", address)
+	fmt.Println("Account: ", address)
 
 	items := []*types.GridBlockFeeItem{}
 	for _, block := range blocks {
@@ -85,7 +85,7 @@ func (c *CosmosClient) SendGridInbox(account cosmosaccount.Account, gridId strin
 	if err != nil {
 		log.Fatal(err)
 	}
-	println("Account: ", address)
+	fmt.Println("Account: ", address)
 
 	// Define a message to create a grid inbox
 	msg := types.MsgCreateGridInbox{
@@ -114,7 +114,7 @@ func (c *CosmosClient) SyncStateAccount(account cosmosaccount.Account, source st
 	if err != nil {
 		log.Fatal(err)
 	}
-	println("Account: ", address)
+	fmt.Println("Account: ", address)
 
 	// Define a message to create a grid inbox
 	msg := types.MsgCreateSolanaAccount{
