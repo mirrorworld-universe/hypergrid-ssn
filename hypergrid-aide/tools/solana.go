@@ -142,7 +142,7 @@ func (s *SolanaClient) GetBlocks(start_slot uint64, limit uint64) ([]SolanaBlock
 			blocks = append(blocks, SolanaBlock{
 				Blockhash: resp2.Blockhash.String(),
 				Slot:      block,
-				BlockTime: resp2.BlockTime.Time().Second(),
+				BlockTime: int(resp2.BlockTime.Time().Unix()),
 				Fee:       Fee,
 			})
 		}
