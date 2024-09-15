@@ -11,7 +11,7 @@ import (
 func (k msgServer) CreateGridBlockFee(goCtx context.Context, msg *types.MsgCreateGridBlockFee) (*types.MsgCreateGridBlockFeeResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	ids := make([]uint64, len(msg.Items))
+	ids := make([]uint64, 0, len(msg.Items))
 	for _, item := range msg.Items {
 		var gridBlockFee = types.GridBlockFee{
 			Creator:   msg.Creator,

@@ -60,23 +60,23 @@ func (k msgServer) CreateFeeSettlementBill(goCtx context.Context, msg *types.Msg
 	//todo: call sonic grid to settle the fee
 	// get sonic grid node
 	sonic_grid_rpc := ""
-	data_accounts := []string{}
+	// data_accounts := []string{}
 	nodes := k.GetAllHypergridNode(goCtx)
 	for _, node := range nodes {
 		// get sonic grid node from the list
 		if node.Role == 2 && sonic_grid_rpc == "" {
 			sonic_grid_rpc = node.Rpc
 		}
-		if node.DataAccount != "" {
-			data_accounts = append(data_accounts, node.DataAccount)
-		}
+		// if node.DataAccount != "" {
+		// 	data_accounts = append(data_accounts, node.DataAccount)
+		// }
 	}
 
 	if sonic_grid_rpc == "" {
 		return nil, errorsmod.Wrap(sdkerrors.ErrKeyNotFound, "sonic grid rpc not found")
 	}
 
-	sig, err := solana.SendTxFeeSettlement(sonic_grid_rpc, data_accounts, feeSettlementBill.FromId, feeSettlementBill.EndId, bills)
+	sig, err := solana.SendTxFeeSettlement(sonic_grid_rpc /* data_accounts,*/, feeSettlementBill.FromId, feeSettlementBill.EndId, bills)
 	if err != nil {
 		return nil, errorsmod.Wrap(sdkerrors.ErrUnauthorized, err.Error())
 	}

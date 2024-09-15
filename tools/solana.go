@@ -136,6 +136,7 @@ func (d *InitializedParams) BorshEncode() ([]byte, error) {
 }
 
 const SonicFeeProgramID = "SonicFeeSet1ement11111111111111111111111111"
+const SonicFeeDataAccountID = "SonicFeeSet1ementData1111111111111111111112"
 const L1InboxProgramID = "5XJ1wZkTwAw9mc5FbM3eBgAT83TKgtAGzKos9wVxC6my"
 
 func getLocalPrivateKey() (solana.PrivateKey, error) {
@@ -231,7 +232,7 @@ func sendSonicTx(rpcUrl string, programId string, accounts solana.AccountMetaSli
 	return &sig, nil
 }
 
-func SendTxFeeSettlement(rpcUrl string, data_accounts []string, FromId uint64, EndID uint64, bills map[string]uint64) (*solana.Signature, error) {
+func SendTxFeeSettlement(rpcUrl string /*data_accounts []string,*/, FromId uint64, EndID uint64, bills map[string]uint64) (*solana.Signature, error) {
 	Bills := []SettlementBillParam{}
 	// convert bills to []SettlementBillParam
 	for key, value := range bills {
@@ -255,10 +256,12 @@ func SendTxFeeSettlement(rpcUrl string, data_accounts []string, FromId uint64, E
 		return nil, err
 	}
 
-	accounts := solana.AccountMetaSlice{}
-	for _, data_account := range data_accounts {
-		accounts = append(accounts, solana.NewAccountMeta(solana.MustPublicKeyFromBase58(data_account), true, false))
+	accounts := solana.AccountMetaSlice{
+		solana.NewAccountMeta(solana.MustPublicKeyFromBase58(SonicFeeDataAccountID), true, false),
 	}
+	// for _, data_account := range data_accounts {
+	// 	accounts = append(accounts, solana.NewAccountMeta(solana.MustPublicKeyFromBase58(data_account), true, false))
+	// }
 	signer, err := getLocalPrivateKey()
 	if err != nil {
 		// panic(err)
@@ -269,7 +272,7 @@ func SendTxFeeSettlement(rpcUrl string, data_accounts []string, FromId uint64, E
 	return sendSonicTx(rpcUrl, SonicFeeProgramID, accounts, serializedData, signers)
 }
 
-func InitializeDataAccount(rpcUrl string, owner string, data_account string, account_type uint32) (*solana.Signature, error) {
+func InitializeDataAccount(rpcUrl string, owner string /*data_account string,*/, account_type uint32) (*solana.Signature, error) {
 	instructionData := InitializedParams{
 		Instruction: 0,
 		Owner:       solana.MustPublicKeyFromBase58(owner),
@@ -284,7 +287,7 @@ func InitializeDataAccount(rpcUrl string, owner string, data_account string, acc
 	}
 
 	accounts := solana.AccountMetaSlice{
-		solana.NewAccountMeta(solana.MustPublicKeyFromBase58(data_account), true, false),
+		solana.NewAccountMeta(solana.MustPublicKeyFromBase58(SonicFeeDataAccountID), true, false),
 	}
 
 	signer, err := getLocalPrivateKey()
