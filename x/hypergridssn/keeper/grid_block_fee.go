@@ -53,6 +53,11 @@ func (k Keeper) AppendGridBlockFee(
 	appendedValue := k.cdc.MustMarshal(&gridBlockFee)
 	store.Set(GetGridBlockFeeIDBytes(gridBlockFee.Id), appendedValue)
 
+	// Save the hash of the gridBlockFee to make blockhash unique.
+	store2 := prefix.NewStore(storeAdapter, types.KeyPrefix(types.GridBlockhashKey))
+	hashBytes := []byte(gridBlockFee.Blockhash)
+	store2.Set(GetGridBlockFeeHashBytes(gridBlockFee.Blockhash), hashBytes)
+
 	// Update gridBlockFee count
 	k.SetGridBlockFeeCount(ctx, count+1)
 
@@ -103,10 +108,37 @@ func (k Keeper) GetAllGridBlockFee(ctx context.Context) (list []types.GridBlockF
 	return
 }
 
+// / Check if the key exists in the store
+func (k Keeper) HasGridBlockFeeHash(
+	ctx context.Context,
+	hash string,
+
+) bool {
+	storeAdapter := runtime.KVStoreAdapter(k.storeService.OpenKVStore(ctx))
+	store := prefix.NewStore(storeAdapter, types.KeyPrefix(types.GridBlockhashKey))
+
+	b := store.Get(GetGridBlockFeeHashBytes(
+		hash,
+	))
+	return b != nil
+}
+
 // GetGridBlockFeeIDBytes returns the byte representation of the ID
 func GetGridBlockFeeIDBytes(id uint64) []byte {
 	bz := types.KeyPrefix(types.GridBlockFeeKey)
 	bz = append(bz, []byte("/")...)
 	bz = binary.BigEndian.AppendUint64(bz, id)
 	return bz
+}
+
+// GetGridBlockFeeIDBytes returns the byte representation of the ID
+func GetGridBlockFeeHashBytes(
+	hash string,
+) []byte {
+	var key []byte
+	hashBytes := []byte(hash)
+	key = append(key, hashBytes...)
+	key = append(key, []byte("/")...)
+
+	return key
 }
