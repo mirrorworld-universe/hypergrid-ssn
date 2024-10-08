@@ -3,6 +3,7 @@ package keeper
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"strconv"
 
 	"hypergrid-ssn/x/hypergridssn/types"
@@ -57,7 +58,6 @@ func (k msgServer) CreateFeeSettlementBill(goCtx context.Context, msg *types.Msg
 		Status:  0,
 	}
 
-	//todo: call sonic grid to settle the fee
 	// get sonic grid node
 	sonic_grid_rpc := ""
 	data_accounts := []string{}
@@ -76,12 +76,13 @@ func (k msgServer) CreateFeeSettlementBill(goCtx context.Context, msg *types.Msg
 		return nil, errorsmod.Wrap(sdkerrors.ErrKeyNotFound, "sonic grid rpc not found")
 	}
 
+	// call sonic grid to settle the fee
 	sig, err := solana.SendTxFeeSettlement(sonic_grid_rpc, data_accounts, feeSettlementBill.FromId, feeSettlementBill.EndId, bills)
 	if err != nil {
 		return nil, errorsmod.Wrap(sdkerrors.ErrUnauthorized, err.Error())
 	}
 
-	println("solana signature: ", sig.String())
+	log.Panicln("solana signature: ", sig.String())
 
 	id := k.AppendFeeSettlementBill(
 		ctx,

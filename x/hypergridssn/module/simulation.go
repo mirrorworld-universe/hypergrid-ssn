@@ -24,59 +24,59 @@ var (
 
 const (
 	opWeightMsgCreateSolanaAccount = "op_weight_msg_solana_account"
-	// TODO: Determine the simulation weight value
+	// Determine the simulation weight value
 	defaultWeightMsgCreateSolanaAccount int = 100
 
 	opWeightMsgUpdateSolanaAccount = "op_weight_msg_solana_account"
-	// TODO: Determine the simulation weight value
+	// Determine the simulation weight value
 	defaultWeightMsgUpdateSolanaAccount int = 100
 
 	opWeightMsgDeleteSolanaAccount = "op_weight_msg_solana_account"
-	// TODO: Determine the simulation weight value
+	// Determine the simulation weight value
 	defaultWeightMsgDeleteSolanaAccount int = 100
 
 	opWeightMsgCreateGridTxFee = "op_weight_msg_grid_tx_fee"
-	// TODO: Determine the simulation weight value
+	// Determine the simulation weight value
 	defaultWeightMsgCreateGridTxFee int = 100
 
 	opWeightMsgCreateGridBlockFee = "op_weight_msg_grid_block_fee"
-	// TODO: Determine the simulation weight value
+	// Determine the simulation weight value
 	defaultWeightMsgCreateGridBlockFee int = 100
 
 	opWeightMsgUpdateGridBlockFee = "op_weight_msg_grid_block_fee"
-	// TODO: Determine the simulation weight value
+	// Determine the simulation weight value
 	defaultWeightMsgUpdateGridBlockFee int = 100
 
 	opWeightMsgDeleteGridBlockFee = "op_weight_msg_grid_block_fee"
-	// TODO: Determine the simulation weight value
+	// Determine the simulation weight value
 	defaultWeightMsgDeleteGridBlockFee int = 100
 
 	opWeightMsgCreateHypergridNode = "op_weight_msg_hypergrid_node"
-	// TODO: Determine the simulation weight value
+	// Determine the simulation weight value
 	defaultWeightMsgCreateHypergridNode int = 100
 
 	opWeightMsgUpdateHypergridNode = "op_weight_msg_hypergrid_node"
-	// TODO: Determine the simulation weight value
+	// Determine the simulation weight value
 	defaultWeightMsgUpdateHypergridNode int = 100
 
 	opWeightMsgDeleteHypergridNode = "op_weight_msg_hypergrid_node"
-	// TODO: Determine the simulation weight value
+	// Determine the simulation weight value
 	defaultWeightMsgDeleteHypergridNode int = 100
 
 	opWeightMsgCreateFeeSettlementBill = "op_weight_msg_fee_settlement_bill"
-	// TODO: Determine the simulation weight value
+	// Determine the simulation weight value
 	defaultWeightMsgCreateFeeSettlementBill int = 100
 
 	opWeightMsgCreateGridInbox = "op_weight_msg_grid_inbox"
-	// TODO: Determine the simulation weight value
+	// Determine the simulation weight value
 	defaultWeightMsgCreateGridInbox int = 100
 
 	opWeightMsgUpdateGridInbox = "op_weight_msg_grid_inbox"
-	// TODO: Determine the simulation weight value
+	// Determine the simulation weight value
 	defaultWeightMsgUpdateGridInbox int = 100
 
 	opWeightMsgDeleteGridInbox = "op_weight_msg_grid_inbox"
-	// TODO: Determine the simulation weight value
+	// Determine the simulation weight value
 	defaultWeightMsgDeleteGridInbox int = 100
 
 	// this line is used by starport scaffolding # simapp/module/const
