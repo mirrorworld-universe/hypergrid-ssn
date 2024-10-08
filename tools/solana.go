@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/binary"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 
@@ -154,8 +155,8 @@ func getLocalPrivateKey() (solana.PrivateKey, error) {
 		// panic(err)
 		return nil, err
 	}
-	fmt.Println("accountFrom private key:", accountFrom)
-	fmt.Println("accountFrom public key:", accountFrom.PublicKey())
+	log.Println("accountFrom private key:", accountFrom)
+	log.Println("accountFrom public key:", accountFrom.PublicKey())
 
 	return accountFrom, nil
 }
@@ -334,7 +335,7 @@ func SendTxInbox(rpcUrl string, slot uint64, hash string) (*solana.Signature, *s
 		return nil, nil, err
 	}
 	data_key := data_account.PublicKey()
-	fmt.Println("data_account:", data_key)
+	log.Println("data_account:", data_key)
 
 	signer, err := getLocalPrivateKey()
 	if err != nil {
@@ -355,7 +356,7 @@ func SendTxInbox(rpcUrl string, slot uint64, hash string) (*solana.Signature, *s
 		// panic(err)
 		return nil, nil, err
 	}
-	fmt.Println("signature: ", sig)
+	log.Println("signature: ", sig)
 
 	return sig, &data_key, nil
 }

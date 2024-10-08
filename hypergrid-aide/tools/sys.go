@@ -1,7 +1,6 @@
 package tools
 
 import (
-	"fmt"
 	"io"
 	"log"
 	"os"
@@ -34,24 +33,24 @@ func GetLastSentSlot() (uint64, error) {
 
 		fd, err := io.ReadAll(f)
 		if err != nil {
-			fmt.Println("read to fd fail", err)
+			log.Println("read to fd fail", err)
 			return 0, err
 		}
 		last_sent_slot, err := strconv.ParseUint(string(fd), 10, 64) // 将fd从[]byte转换为string，然后转换为int
 		if err != nil {
-			fmt.Println("convert fd to int fail", err)
+			log.Println("convert fd to int fail", err)
 			return 0, err
 
 		}
-		fmt.Println("read last_sent_slot: ", last_sent_slot)
+		log.Println("read last_sent_slot: ", last_sent_slot)
 		return last_sent_slot, nil
 	}
-	fmt.Println("file not exist")
+	log.Println("file not exist")
 	return 0, nil
 }
 
 func SetLastSentSlot(slot uint64) (bool, error) {
-	fmt.Println("SetLastSentSlot: ", slot)
+	log.Println("SetLastSentSlot: ", slot)
 	if !CheckFileExist(AIDE_CONFIG_FILE) {
 
 		f, err := os.Create(AIDE_CONFIG_FILE)

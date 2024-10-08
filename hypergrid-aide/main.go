@@ -29,35 +29,35 @@ func SendGridBlockFees(cosmos tools.CosmosClient, solana tools.SolanaClient, acc
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("first_available_slot: ", first_available_slot)
+	log.Println("first_available_slot: ", first_available_slot)
 
 	last_sent_slot, err := tools.GetLastSentSlot()
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("last_sent_slot: ", last_sent_slot)
+	log.Println("last_sent_slot: ", last_sent_slot)
 	//choose the max of last_sent_slot and first_available_slot - 1
 	start_slot := last_sent_slot + 1
 	if last_sent_slot < first_available_slot {
 		start_slot = first_available_slot
 	}
 
-	fmt.Println("start_slot: ", start_slot)
+	log.Println("start_slot: ", start_slot)
 	blocks, latest_slot, err := solana.GetBlocks(start_slot, limit)
-	fmt.Println("start_slot2: ", start_slot)
+	log.Println("start_slot2: ", start_slot)
 	if err != nil {
-		fmt.Println("GetBlocks fail")
+		log.Println("GetBlocks fail")
 		log.Fatal(err)
 	}
-	fmt.Println("blocks: ", len(blocks))
+	log.Println("blocks: ", len(blocks))
 	if len(blocks) > 0 {
-		fmt.Println("SendGridBlockFees")
+		log.Println("SendGridBlockFees")
 		resp, err_send := cosmos.SendGridBlockFees(account, gridId, blocks)
 		if err_send != nil {
 			log.Fatal(err_send)
-			fmt.Println("SendGridBlockFees fail")
+			log.Println("SendGridBlockFees fail")
 		} else {
-			fmt.Println("SendGridBlockFees success")
+			log.Println("SendGridBlockFees success")
 			last_sent_slot = latest_slot //blocks[len(blocks)-1].Slot
 			_, err = tools.SetLastSentSlot(last_sent_slot)
 			if err != nil {
@@ -65,7 +65,7 @@ func SendGridBlockFees(cosmos tools.CosmosClient, solana tools.SolanaClient, acc
 			}
 
 		}
-		fmt.Print("MsgCreateGridTxFee:", resp)
+		log.Print("MsgCreateGridTxFee:", resp)
 	} else {
 		last_sent_slot = latest_slot
 		_, err = tools.SetLastSentSlot(last_sent_slot)
@@ -99,8 +99,8 @@ func SyncStateAccount(cosmos tools.CosmosClient, account cosmosaccount.Account, 
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Print("SyncStateAccount:\n\n")
-	fmt.Println(res)
+	log.Print("SyncStateAccount:\n\n")
+	log.Println(res)
 }
 
 func main() {
