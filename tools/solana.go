@@ -3,7 +3,6 @@ package tools
 import (
 	"bytes"
 	"context"
-	"crypto/sha256"
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
@@ -63,6 +62,7 @@ func ReadVariablesFromYaml(filename string) {
 	SonicStateOracleURL = params["SonicStateOracleURL"].(string)
 }
 
+// Get account info from oracle
 func GetAccountFromOracle(rpcUrl string, address string, version string) (*rpc.GetAccountInfoResult, error) {
 	// call http client to get account info from oracle
 	client := &http.Client{}
@@ -365,21 +365,21 @@ func InitializeDataAccount(rpcUrl string, owner string, data_account string, acc
 	return sendSonicTx(rpcUrl, SonicFeeProgramID, accounts, serializedData, signers)
 }
 
-type InboxProgrmParams struct {
-	Instruction [8]byte
-	Slot        uint64
-	Hash        string
-}
+// type InboxProgrmParams struct {
+// 	Instruction [8]byte
+// 	Slot        uint64
+// 	Hash        string
+// }
 
-func hashInstructionMethod(method string) [8]byte {
-	hasher := sha256.New()
-	hasher.Write([]byte(fmt.Sprintf("global:%s", method)))
-	result := hasher.Sum(nil)
+// func hashInstructionMethod(method string) [8]byte {
+// 	hasher := sha256.New()
+// 	hasher.Write([]byte(fmt.Sprintf("global:%s", method)))
+// 	result := hasher.Sum(nil)
 
-	var hash [8]byte
-	copy(hash[:], result[:8])
-	return hash
-}
+// 	var hash [8]byte
+// 	copy(hash[:], result[:8])
+// 	return hash
+// }
 
 // func SendTxInbox(rpcUrl string, slot uint64, hash string) (*solana.Signature, *solana.PublicKey, error) {
 // 	instructionData := InboxProgrmParams{
