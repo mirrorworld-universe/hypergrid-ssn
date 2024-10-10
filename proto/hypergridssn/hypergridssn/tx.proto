@@ -10,7 +10,6 @@ import "hypergridssn/hypergridssn/params.proto";
 import "hypergridssn/hypergridssn/grid_block_fee.proto";
 import "hypergridssn/hypergridssn/hypergrid_node.proto";
 import "hypergridssn/hypergridssn/fee_settlement_bill.proto";
-import "hypergridssn/hypergridssn/grid_inbox.proto";
 
 // import "hypergridssn/hypergridssn/solana_account.proto";
 
@@ -31,7 +30,6 @@ service Msg {
   rpc UpdateHypergridNode     (MsgUpdateHypergridNode    ) returns (MsgUpdateHypergridNodeResponse    );
   rpc DeleteHypergridNode     (MsgDeleteHypergridNode    ) returns (MsgDeleteHypergridNodeResponse    );
   rpc CreateFeeSettlementBill (MsgCreateFeeSettlementBill) returns (MsgCreateFeeSettlementBillResponse);
-  rpc CreateGridInbox         (MsgCreateGridInbox        ) returns (MsgCreateGridInboxResponse        );
 }
 // MsgUpdateParams is the Msg/UpdateParams request type.
 message MsgUpdateParams {
@@ -152,18 +150,5 @@ message MsgCreateFeeSettlementBill {
 
 message MsgCreateFeeSettlementBillResponse {
   uint64 id     = 1;
-  string txhash = 2;
-}
-
-message MsgCreateGridInbox {
-  option (cosmos.msg.v1.signer) = "creator";
-  string creator = 1;
-  string grid    = 2;
-  string slot    = 3;
-  string hash    = 4;
-}
-
-message MsgCreateGridInboxResponse {
-  uint64 id = 1;
   string txhash = 2;
 }

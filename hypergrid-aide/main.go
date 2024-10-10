@@ -18,7 +18,8 @@ import (
 )
 
 // Default values for the global variables
-var SOLANA_RPC_ENDPOINT = "http://localhost:8899" //"https://devnet1.sonic.game" //
+var SOLANA_RPC_ENDPOINT = "http://localhost:8899"
+var SOLANA_BASELAYER_RPC = "https://api.devnet.solana.com"
 var SOLANA_PRIVATE_KEY = "~/.config/solana/id.json"
 var COSMOS_RPC_ENDPOINT = "http://172.31.10.244:26657"
 var COSMOS_ADDRESS_PREFIX = "cosmos"
@@ -58,6 +59,7 @@ func readVariablesFromYaml(filename string) {
 
 	// Set the global variables
 	SOLANA_RPC_ENDPOINT = params["solana_rpc"].(string)
+	SOLANA_BASELAYER_RPC = params["solana_baselayer_rpc"].(string)
 	SOLANA_PRIVATE_KEY = params["solana_private_key"].(string)
 	COSMOS_RPC_ENDPOINT = params["cosmos_rpc"].(string)
 	COSMOS_ADDRESS_PREFIX = params["cosmos_address_prefix"].(string)
@@ -129,13 +131,22 @@ func SendGridBlockFees(cosmos tools.CosmosClient, solana tools.SolanaClient, acc
 	// fmt.Println(queryResp)
 }
 
-func SendGridInbox(cosmos tools.CosmosClient, solana tools.SolanaClient, account cosmosaccount.Account, gridId string) {
+// func SendGridInbox(cosmos tools.CosmosClient, solana tools.SolanaClient, account cosmosaccount.Account, gridId string) {
+// 	block, err := solana.GetLastBlock()
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+
+// 	cosmos.SendGridInbox(account, gridId, block)
+// }
+
+func SendGridInbox(solana tools.SolanaClient) {
 	block, err := solana.GetLastBlock()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	cosmos.SendGridInbox(account, gridId, block)
+	tools.SendTxInbox(SOLANA_BASELAYER_RPC, block.Slot, block.Blockhash)
 }
 
 func SyncStateAccount(cosmos tools.CosmosClient, account cosmosaccount.Account, source string, pubkey string) {
@@ -186,23 +197,24 @@ func main() {
 		SyncStateAccount(*cosmos, account, source, pubkey)
 		// break
 	case "inbox":
-		cosmos := tools.NewCosmosClient(
-			cosmosclient.WithNodeAddress(COSMOS_RPC_ENDPOINT),
-			cosmosclient.WithAddressPrefix(COSMOS_ADDRESS_PREFIX),
-			cosmosclient.WithHome(home+"/"+COSMOS_HOME),
-			cosmosclient.WithGas(COSMOS_GAS),
-		)
+		// cosmos := tools.NewCosmosClient(
+		// 	cosmosclient.WithNodeAddress(COSMOS_RPC_ENDPOINT),
+		// 	cosmosclient.WithAddressPrefix(COSMOS_ADDRESS_PREFIX),
+		// 	cosmosclient.WithHome(home+"/"+COSMOS_HOME),
+		// 	cosmosclient.WithGas(COSMOS_GAS),
+		// )
 		solana := tools.NewSolanaClient(SOLANA_RPC_ENDPOINT)
-		account, err := cosmos.Account(COSMOS_KEY)
-		if err != nil {
-			log.Fatal(err)
-		}
-		resp, err := solana.GetIdentity()
-		if err != nil {
-			log.Fatal(err)
-		}
-		gridId := resp.Identity.String()
-		SendGridInbox(*cosmos, *solana, account, gridId)
+		// account, err := cosmos.Account(COSMOS_KEY)
+		// if err != nil {
+		// 	log.Fatal(err)
+		// }
+		// resp, err := solana.GetIdentity()
+		// if err != nil {
+		// 	log.Fatal(err)
+		// }
+		// gridId := resp.Identity.String()
+		// SendGridInbox(*cosmos, *solana, account, gridId)
+		SendGridInbox(*solana)
 		// break
 	case "block":
 		limit := AIDE_GET_BLOCKS_COUNT_LIMIT

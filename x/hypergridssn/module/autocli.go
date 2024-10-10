@@ -61,17 +61,6 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					Short:          "Shows a FeeSettlementBill by id",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "id"}},
 				},
-				{
-					RpcMethod: "GridInboxAll",
-					Use:       "list-grid-inbox",
-					Short:     "List all GridInbox",
-				},
-				{
-					RpcMethod:      "GridInbox",
-					Use:            "show-grid-inbox [id]",
-					Short:          "Shows a GridInbox by id",
-					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "id"}},
-				},
 				// this line is used by ignite scaffolding # autocli/query
 			},
 		},
@@ -130,12 +119,6 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					Use:            "create-fee-settlement-bill [fromId] [endId]",
 					Short:          "Create FeeSettlementBill",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "fromId"}, {ProtoField: "endId"}},
-				},
-				{
-					RpcMethod:      "CreateGridInbox",
-					Use:            "create-grid-inbox [grid] [slot] [hash]",
-					Short:          "Create GridInbox",
-					PositionalArgs: []*autocliv1.PositionalArgDescriptor{{ProtoField: "grid"}, {ProtoField: "slot"}, {ProtoField: "hash"}},
 				},
 				// this line is used by ignite scaffolding # autocli/tx
 			},

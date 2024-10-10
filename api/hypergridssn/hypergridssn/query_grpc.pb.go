@@ -28,8 +28,6 @@ const (
 	Query_HypergridNodeAll_FullMethodName     = "/hypergridssn.hypergridssn.Query/HypergridNodeAll"
 	Query_FeeSettlementBill_FullMethodName    = "/hypergridssn.hypergridssn.Query/FeeSettlementBill"
 	Query_FeeSettlementBillAll_FullMethodName = "/hypergridssn.hypergridssn.Query/FeeSettlementBillAll"
-	Query_GridInbox_FullMethodName            = "/hypergridssn.hypergridssn.Query/GridInbox"
-	Query_GridInboxAll_FullMethodName         = "/hypergridssn.hypergridssn.Query/GridInboxAll"
 )
 
 // QueryClient is the client API for Query service.
@@ -50,9 +48,6 @@ type QueryClient interface {
 	// Queries a list of FeeSettlementBill items.
 	FeeSettlementBill(ctx context.Context, in *QueryGetFeeSettlementBillRequest, opts ...grpc.CallOption) (*QueryGetFeeSettlementBillResponse, error)
 	FeeSettlementBillAll(ctx context.Context, in *QueryAllFeeSettlementBillRequest, opts ...grpc.CallOption) (*QueryAllFeeSettlementBillResponse, error)
-	// Queries a list of GridInbox items.
-	GridInbox(ctx context.Context, in *QueryGetGridInboxRequest, opts ...grpc.CallOption) (*QueryGetGridInboxResponse, error)
-	GridInboxAll(ctx context.Context, in *QueryAllGridInboxRequest, opts ...grpc.CallOption) (*QueryAllGridInboxResponse, error)
 }
 
 type queryClient struct {
@@ -144,24 +139,6 @@ func (c *queryClient) FeeSettlementBillAll(ctx context.Context, in *QueryAllFeeS
 	return out, nil
 }
 
-func (c *queryClient) GridInbox(ctx context.Context, in *QueryGetGridInboxRequest, opts ...grpc.CallOption) (*QueryGetGridInboxResponse, error) {
-	out := new(QueryGetGridInboxResponse)
-	err := c.cc.Invoke(ctx, Query_GridInbox_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *queryClient) GridInboxAll(ctx context.Context, in *QueryAllGridInboxRequest, opts ...grpc.CallOption) (*QueryAllGridInboxResponse, error) {
-	out := new(QueryAllGridInboxResponse)
-	err := c.cc.Invoke(ctx, Query_GridInboxAll_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // QueryServer is the server API for Query service.
 // All implementations must embed UnimplementedQueryServer
 // for forward compatibility
@@ -180,9 +157,6 @@ type QueryServer interface {
 	// Queries a list of FeeSettlementBill items.
 	FeeSettlementBill(context.Context, *QueryGetFeeSettlementBillRequest) (*QueryGetFeeSettlementBillResponse, error)
 	FeeSettlementBillAll(context.Context, *QueryAllFeeSettlementBillRequest) (*QueryAllFeeSettlementBillResponse, error)
-	// Queries a list of GridInbox items.
-	GridInbox(context.Context, *QueryGetGridInboxRequest) (*QueryGetGridInboxResponse, error)
-	GridInboxAll(context.Context, *QueryAllGridInboxRequest) (*QueryAllGridInboxResponse, error)
 	mustEmbedUnimplementedQueryServer()
 }
 
@@ -216,12 +190,6 @@ func (UnimplementedQueryServer) FeeSettlementBill(context.Context, *QueryGetFeeS
 }
 func (UnimplementedQueryServer) FeeSettlementBillAll(context.Context, *QueryAllFeeSettlementBillRequest) (*QueryAllFeeSettlementBillResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FeeSettlementBillAll not implemented")
-}
-func (UnimplementedQueryServer) GridInbox(context.Context, *QueryGetGridInboxRequest) (*QueryGetGridInboxResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GridInbox not implemented")
-}
-func (UnimplementedQueryServer) GridInboxAll(context.Context, *QueryAllGridInboxRequest) (*QueryAllGridInboxResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GridInboxAll not implemented")
 }
 func (UnimplementedQueryServer) mustEmbedUnimplementedQueryServer() {}
 
@@ -398,42 +366,6 @@ func _Query_FeeSettlementBillAll_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Query_GridInbox_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryGetGridInboxRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(QueryServer).GridInbox(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Query_GridInbox_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).GridInbox(ctx, req.(*QueryGetGridInboxRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Query_GridInboxAll_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryAllGridInboxRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(QueryServer).GridInboxAll(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Query_GridInboxAll_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).GridInboxAll(ctx, req.(*QueryAllGridInboxRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // Query_ServiceDesc is the grpc.ServiceDesc for Query service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -476,14 +408,6 @@ var Query_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "FeeSettlementBillAll",
 			Handler:    _Query_FeeSettlementBillAll_Handler,
-		},
-		{
-			MethodName: "GridInbox",
-			Handler:    _Query_GridInbox_Handler,
-		},
-		{
-			MethodName: "GridInboxAll",
-			Handler:    _Query_GridInboxAll_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
