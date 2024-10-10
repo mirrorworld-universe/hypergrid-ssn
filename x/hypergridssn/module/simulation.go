@@ -67,18 +67,6 @@ const (
 	// Determine the simulation weight value
 	defaultWeightMsgCreateFeeSettlementBill int = 100
 
-	opWeightMsgCreateGridInbox = "op_weight_msg_grid_inbox"
-	// Determine the simulation weight value
-	defaultWeightMsgCreateGridInbox int = 100
-
-	opWeightMsgUpdateGridInbox = "op_weight_msg_grid_inbox"
-	// Determine the simulation weight value
-	defaultWeightMsgUpdateGridInbox int = 100
-
-	opWeightMsgDeleteGridInbox = "op_weight_msg_grid_inbox"
-	// Determine the simulation weight value
-	defaultWeightMsgDeleteGridInbox int = 100
-
 	// this line is used by starport scaffolding # simapp/module/const
 )
 

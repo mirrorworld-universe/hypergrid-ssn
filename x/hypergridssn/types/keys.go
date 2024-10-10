@@ -34,8 +34,3 @@ const (
 	FeeSettlementBillKey      = "FeeSettlementBill/value/"
 	FeeSettlementBillCountKey = "FeeSettlementBill/count/"
 )
-
-const (
-	GridInboxKey      = "GridInbox/value/"
-	GridInboxCountKey = "GridInbox/count/"
-)
