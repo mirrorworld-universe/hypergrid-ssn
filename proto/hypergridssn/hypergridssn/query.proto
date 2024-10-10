@@ -11,7 +11,6 @@ import "hypergridssn/hypergridssn/solana_account.proto";
 import "hypergridssn/hypergridssn/grid_block_fee.proto";
 import "hypergridssn/hypergridssn/hypergrid_node.proto";
 import "hypergridssn/hypergridssn/fee_settlement_bill.proto";
-import "hypergridssn/hypergridssn/grid_inbox.proto";
 
 option go_package = "hypergrid-ssn/x/hypergridssn/types";
 
@@ -61,16 +60,6 @@ service Query {
   }
   rpc FeeSettlementBillAll (QueryAllFeeSettlementBillRequest) returns (QueryAllFeeSettlementBillResponse) {
     option (google.api.http).get = "/hypergrid-ssn/hypergridssn/fee_settlement_bill";
-  
-  }
-  
-  // Queries a list of GridInbox items.
-  rpc GridInbox    (QueryGetGridInboxRequest) returns (QueryGetGridInboxResponse) {
-    option (google.api.http).get = "/hypergrid-ssn/hypergridssn/grid_inbox/{id}";
-  
-  }
-  rpc GridInboxAll (QueryAllGridInboxRequest) returns (QueryAllGridInboxResponse) {
-    option (google.api.http).get = "/hypergrid-ssn/hypergridssn/grid_inbox";
   
   }
 }
@@ -151,22 +140,5 @@ message QueryAllFeeSettlementBillRequest {
 message QueryAllFeeSettlementBillResponse {
   repeated FeeSettlementBill                      FeeSettlementBill = 1 [(gogoproto.nullable) = false];
            cosmos.base.query.v1beta1.PageResponse pagination        = 2;
-}
-
-message QueryGetGridInboxRequest {
-  uint64 id = 1;
-}
-
-message QueryGetGridInboxResponse {
-  GridInbox GridInbox = 1 [(gogoproto.nullable) = false];
-}
-
-message QueryAllGridInboxRequest {
-  cosmos.base.query.v1beta1.PageRequest pagination = 1;
-}
-
-message QueryAllGridInboxResponse {
-  repeated GridInbox                              GridInbox  = 1 [(gogoproto.nullable) = false];
-           cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }
 

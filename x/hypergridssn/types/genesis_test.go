@@ -59,15 +59,6 @@ func TestGenesisState_Validate(t *testing.T) {
 					},
 				},
 				FeeSettlementBillCount: 2,
-				GridInboxList: []types.GridInbox{
-					{
-						Id: 0,
-					},
-					{
-						Id: 1,
-					},
-				},
-				GridInboxCount: 2,
 				// this line is used by starport scaffolding # types/genesis/validField
 			},
 			valid: true,
@@ -151,32 +142,6 @@ func TestGenesisState_Validate(t *testing.T) {
 					},
 				},
 				FeeSettlementBillCount: 0,
-			},
-			valid: false,
-		},
-		{
-			desc: "duplicated gridInbox",
-			genState: &types.GenesisState{
-				GridInboxList: []types.GridInbox{
-					{
-						Id: 0,
-					},
-					{
-						Id: 0,
-					},
-				},
-			},
-			valid: false,
-		},
-		{
-			desc: "invalid gridInbox count",
-			genState: &types.GenesisState{
-				GridInboxList: []types.GridInbox{
-					{
-						Id: 1,
-					},
-				},
-				GridInboxCount: 0,
 			},
 			valid: false,
 		},

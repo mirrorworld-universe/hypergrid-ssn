@@ -5,9 +5,11 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/binary"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
+	"net/http"
 	"os"
 	"sort"
 	"strings"
@@ -17,9 +19,78 @@ import (
 	"github.com/gagliardetto/solana-go/rpc"
 	confirm "github.com/gagliardetto/solana-go/rpc/sendAndConfirmTransaction"
 	"github.com/gagliardetto/solana-go/rpc/ws"
-	"github.com/near/borsh-go"
 	"gopkg.in/yaml.v3"
 )
+
+// global variables with default values
+var SonicFeeProgramID = "SonicFeeSet1ement11111111111111111111111111"
+var L1InboxProgramID = "5XJ1wZkTwAw9mc5FbM3eBgAT83TKgtAGzKos9wVxC6my"
+var LocalPrivateKey = "~/.config/solana/id.json"
+var SonicStateOracleURL = "https://oracle.sonic.game"
+
+// read variables from yaml file
+func ReadVariablesFromYaml(filename string) {
+	// Open the file
+	file, err := os.Open(filename)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	defer file.Close()
+
+	// Read the file
+	data, err := io.ReadAll(file)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	// Unmarshal the YAML
+	var params map[string]interface{}
+	err = yaml.Unmarshal(data, &params)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	// Print the params
+	log.Println(params)
+
+	// Set the global variables
+	SonicFeeProgramID = params["SonicFeeProgramID"].(string)
+	L1InboxProgramID = params["L1InboxProgramID"].(string)
+	LocalPrivateKey = params["LocalPrivateKey"].(string)
+	SonicStateOracleURL = params["SonicStateOracleURL"].(string)
+}
+
+func GetAccountFromOracle(rpcUrl string, address string, version string) (*rpc.GetAccountInfoResult, error) {
+	// call http client to get account info from oracle
+	client := &http.Client{}
+	reqBody := fmt.Sprintf(`{"rpc": "%s", "address": "%s", "version": "%s"}`, rpcUrl, address, version)
+	req, err := http.NewRequest("POST", SonicStateOracleURL, bytes.NewBuffer([]byte(reqBody)))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("failed to get account info: %s", resp.Status)
+	}
+
+	var result rpc.GetAccountInfoResult
+	err = json.NewDecoder(resp.Body).Decode(&result)
+	if err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
 
 func GetAccountInfo(rpcUrl string, address string) (*rpc.GetAccountInfoResult, error) {
 	// endpoint := rpc.DevNet_RPC //MainNetBeta_RPC
@@ -137,45 +208,6 @@ func (d *InitializedParams) BorshEncode() ([]byte, error) {
 	}
 
 	return buf.Bytes(), nil
-}
-
-// global variables with default values
-var SonicFeeProgramID = "SonicFeeSet1ement11111111111111111111111111"
-var L1InboxProgramID = "5XJ1wZkTwAw9mc5FbM3eBgAT83TKgtAGzKos9wVxC6my"
-var LocalPrivateKey = "~/.config/solana/id.json"
-
-// read variables from yaml file
-func ReadVariablesFromYaml(filename string) {
-	// Open the file
-	file, err := os.Open(filename)
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
-	defer file.Close()
-
-	// Read the file
-	data, err := io.ReadAll(file)
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
-
-	// Unmarshal the YAML
-	var params map[string]interface{}
-	err = yaml.Unmarshal(data, &params)
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
-
-	// Print the params
-	log.Println(params)
-
-	// Set the global variables
-	SonicFeeProgramID = params["SonicFeeProgramID"].(string)
-	L1InboxProgramID = params["L1InboxProgramID"].(string)
-	LocalPrivateKey = params["LocalPrivateKey"].(string)
 }
 
 func getLocalPrivateKey() (solana.PrivateKey, error) {
@@ -349,52 +381,52 @@ func hashInstructionMethod(method string) [8]byte {
 	return hash
 }
 
-func SendTxInbox(rpcUrl string, slot uint64, hash string) (*solana.Signature, *solana.PublicKey, error) {
-	instructionData := InboxProgrmParams{
-		Instruction: hashInstructionMethod("addblock"),
-		Slot:        slot,
-		Hash:        hash,
-	}
+// func SendTxInbox(rpcUrl string, slot uint64, hash string) (*solana.Signature, *solana.PublicKey, error) {
+// 	instructionData := InboxProgrmParams{
+// 		Instruction: hashInstructionMethod("addblock"),
+// 		Slot:        slot,
+// 		Hash:        hash,
+// 	}
 
-	// Serialize to bytes using Borsh
-	serializedData, err := borsh.Serialize(instructionData)
-	if err != nil {
-		// panic(err)
-		return nil, nil, err
-	}
+// 	// Serialize to bytes using Borsh
+// 	serializedData, err := borsh.Serialize(instructionData)
+// 	if err != nil {
+// 		// panic(err)
+// 		return nil, nil, err
+// 	}
 
-	//create a new keypair
-	data_account, err := solana.NewRandomPrivateKey()
-	if err != nil {
-		// panic(err)
-		return nil, nil, err
-	}
-	data_key := data_account.PublicKey()
-	log.Println("data_account:", data_key)
+// 	//create a new keypair
+// 	data_account, err := solana.NewRandomPrivateKey()
+// 	if err != nil {
+// 		// panic(err)
+// 		return nil, nil, err
+// 	}
+// 	data_key := data_account.PublicKey()
+// 	log.Println("data_account:", data_key)
 
-	signer, err := getLocalPrivateKey()
-	if err != nil {
-		// panic(err)
-		return nil, nil, err
-	}
+// 	signer, err := getLocalPrivateKey()
+// 	if err != nil {
+// 		// panic(err)
+// 		return nil, nil, err
+// 	}
 
-	accounts := solana.AccountMetaSlice{
-		solana.NewAccountMeta(data_account.PublicKey(), true, true),
-		solana.NewAccountMeta(signer.PublicKey(), true, true),
-		solana.NewAccountMeta(solana.MustPublicKeyFromBase58("11111111111111111111111111111111"), false, false),
-	}
+// 	accounts := solana.AccountMetaSlice{
+// 		solana.NewAccountMeta(data_account.PublicKey(), true, true),
+// 		solana.NewAccountMeta(signer.PublicKey(), true, true),
+// 		solana.NewAccountMeta(solana.MustPublicKeyFromBase58("11111111111111111111111111111111"), false, false),
+// 	}
 
-	signers := []solana.PrivateKey{signer, data_account}
+// 	signers := []solana.PrivateKey{signer, data_account}
 
-	sig, err := sendSonicTx(rpcUrl, L1InboxProgramID, accounts, serializedData, signers)
-	if err != nil {
-		// panic(err)
-		return nil, nil, err
-	}
-	log.Println("signature: ", sig)
+// 	sig, err := sendSonicTx(rpcUrl, L1InboxProgramID, accounts, serializedData, signers)
+// 	if err != nil {
+// 		// panic(err)
+// 		return nil, nil, err
+// 	}
+// 	log.Println("signature: ", sig)
 
-	return sig, &data_key, nil
-}
+// 	return sig, &data_key, nil
+// }
 
 // func main() {
 // 	GetAccountInfo("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA")

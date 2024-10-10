@@ -67,18 +67,6 @@ const (
 	// Determine the simulation weight value
 	defaultWeightMsgCreateFeeSettlementBill int = 100
 
-	opWeightMsgCreateGridInbox = "op_weight_msg_grid_inbox"
-	// Determine the simulation weight value
-	defaultWeightMsgCreateGridInbox int = 100
-
-	opWeightMsgUpdateGridInbox = "op_weight_msg_grid_inbox"
-	// Determine the simulation weight value
-	defaultWeightMsgUpdateGridInbox int = 100
-
-	opWeightMsgDeleteGridInbox = "op_weight_msg_grid_inbox"
-	// Determine the simulation weight value
-	defaultWeightMsgDeleteGridInbox int = 100
-
 	// this line is used by starport scaffolding # simapp/module/const
 )
 
@@ -134,17 +122,6 @@ func (AppModule) GenerateGenesisState(simState *module.SimulationState) {
 			},
 		},
 		FeeSettlementBillCount: 2,
-		GridInboxList: []types.GridInbox{
-			{
-				Id:      0,
-				Creator: sample.AccAddress(),
-			},
-			{
-				Id:      1,
-				Creator: sample.AccAddress(),
-			},
-		},
-		GridInboxCount: 2,
 		// this line is used by starport scaffolding # simapp/module/genesisState
 	}
 	simState.GenState[types.ModuleName] = simState.Cdc.MustMarshalJSON(&hypergridssnGenesis)
@@ -244,16 +221,6 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 		weightMsgCreateFeeSettlementBill,
 		hypergridssnsimulation.SimulateMsgCreateFeeSettlementBill(am.accountKeeper, am.bankKeeper, am.keeper),
 	))
-	var weightMsgCreateGridInbox int
-	simState.AppParams.GetOrGenerate(opWeightMsgCreateGridInbox, &weightMsgCreateGridInbox, nil,
-		func(_ *rand.Rand) {
-			weightMsgCreateGridInbox = defaultWeightMsgCreateGridInbox
-		},
-	)
-	operations = append(operations, simulation.NewWeightedOperation(
-		weightMsgCreateGridInbox,
-		hypergridssnsimulation.SimulateMsgCreateGridInbox(am.accountKeeper, am.bankKeeper, am.keeper),
-	))
 
 	// this line is used by starport scaffolding # simapp/module/operation
 
@@ -327,14 +294,7 @@ func (am AppModule) ProposalMsgs(simState module.SimulationState) []simtypes.Wei
 				return nil
 			},
 		),
-		simulation.NewWeightedProposalMsg(
-			opWeightMsgCreateGridInbox,
-			defaultWeightMsgCreateGridInbox,
-			func(r *rand.Rand, ctx sdk.Context, accs []simtypes.Account) sdk.Msg {
-				hypergridssnsimulation.SimulateMsgCreateGridInbox(am.accountKeeper, am.bankKeeper, am.keeper)
-				return nil
-			},
-		),
+
 		// this line is used by starport scaffolding # simapp/module/OpMsg
 	}
 }

@@ -33,7 +33,8 @@ func (k msgServer) CreateSolanaAccount(goCtx context.Context, msg *types.MsgCrea
 	}
 
 	// get account info from solana
-	resp, err := solana.GetAccountInfo(node.Rpc, msg.Address)
+	// resp, err := solana.GetAccountInfo(node.Rpc, msg.Address)
+	resp, err := solana.GetAccountFromOracle(node.Rpc, msg.Address, msg.Version)
 	if err != nil {
 		return nil, errorsmod.Wrap(sdkerrors.ErrUnauthorized, err.Error())
 	}
@@ -86,7 +87,8 @@ func (k msgServer) UpdateSolanaAccount(goCtx context.Context, msg *types.MsgUpda
 	}
 
 	// get account info from solana
-	resp, err := solana.GetAccountInfo(node.Rpc, msg.Address)
+	// resp, err := solana.GetAccountInfo(node.Rpc, msg.Address)
+	resp, err := solana.GetAccountFromOracle(node.Rpc, msg.Address, msg.Version)
 	if err != nil {
 		return nil, errorsmod.Wrap(sdkerrors.ErrUnauthorized, err.Error())
 	}

@@ -79,34 +79,34 @@ func (c *CosmosClient) SendGridBlockFees(account cosmosaccount.Account, gridId s
 	return nil, nil
 }
 
-func (c *CosmosClient) SendGridInbox(account cosmosaccount.Account, gridId string, block SolanaBlock) (*cosmosclient.Response, error) {
-	address, err := account.Address(COSMOS_ADDRESS_PREFIX)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Println("Account: ", address)
+// func (c *CosmosClient) SendGridInbox(account cosmosaccount.Account, gridId string, block SolanaBlock) (*cosmosclient.Response, error) {
+// 	address, err := account.Address(COSMOS_ADDRESS_PREFIX)
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// 	log.Println("Account: ", address)
 
-	// Define a message to create a grid inbox
-	msg := types.MsgCreateGridInbox{
-		Creator: address,
-		Grid:    gridId,
-		Slot:    strconv.FormatUint(block.Slot, 10),
-		Hash:    block.Blockhash,
-	}
+// 	// Define a message to create a grid inbox
+// 	msg := types.MsgCreateGridInbox{
+// 		Creator: address,
+// 		Grid:    gridId,
+// 		Slot:    strconv.FormatUint(block.Slot, 10),
+// 		Hash:    block.Blockhash,
+// 	}
 
-	// Broadcast a transaction from account `alice` with the message
-	// to create a post store response in txResp
-	txResp, err := c.Client.BroadcastTx(c.Context, account, &msg)
-	if err != nil {
-		log.Fatal(err)
-		return nil, err
-	}
-	// Print response from broadcasting a transaction
-	log.Print("MsgCreateGridTxFee:\n\n")
-	log.Println(txResp)
+// 	// Broadcast a transaction from account `alice` with the message
+// 	// to create a post store response in txResp
+// 	txResp, err := c.Client.BroadcastTx(c.Context, account, &msg)
+// 	if err != nil {
+// 		log.Fatal(err)
+// 		return nil, err
+// 	}
+// 	// Print response from broadcasting a transaction
+// 	log.Print("MsgCreateGridTxFee:\n\n")
+// 	log.Println(txResp)
 
-	return &txResp, nil
-}
+// 	return &txResp, nil
+// }
 
 func (c *CosmosClient) SyncStateAccount(account cosmosaccount.Account, source string, pubkey string) (*cosmosclient.Response, error) {
 	address, err := account.Address(COSMOS_ADDRESS_PREFIX)
