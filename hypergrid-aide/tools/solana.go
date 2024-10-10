@@ -182,15 +182,9 @@ func (s *SolanaClient) RequestAirdrop(address string, amount uint64) {
 	spew.Dump(out)
 }
 
-func (s *SolanaClient) SendTransaction(programID string) (*solana.Signature, error) {
+func (s *SolanaClient) SendTransaction(LocalPrivateKey string, programID string) (*solana.Signature, error) {
 	// Load the account that you will send funds FROM:
-	//get home path "~/"
-	home, err := os.UserHomeDir()
-	if err != nil {
-		// panic(err)
-		return nil, err
-	}
-	accountFrom, err := solana.PrivateKeyFromSolanaKeygenFile(home + "/.config/solana/id.json")
+	accountFrom, err := solana.PrivateKeyFromSolanaKeygenFile(LocalPrivateKey)
 	if err != nil {
 		panic(err)
 	}

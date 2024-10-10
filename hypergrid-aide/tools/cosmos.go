@@ -12,7 +12,7 @@ import (
 	// Importing the types package of your blog blockchain
 )
 
-const COSMOS_ADDRESS_PREFIX = "cosmos"
+var COSMOS_ADDRESS_PREFIX = "cosmos"
 
 type CosmosClient struct {
 	Context context.Context
