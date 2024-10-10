@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"strconv"
@@ -12,17 +13,60 @@ import (
 	// Importing the general purpose Cosmos blockchain client
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosaccount"
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
+	"gopkg.in/yaml.v3"
 	// Importing the types package of your blog blockchain
 )
 
-const SOLANA_RPC_ENDPOINT = "http://localhost:8899" //"https://devnet1.sonic.game" //
-const COSMOS_RPC_ENDPOINT = "http://172.31.10.244:26657"
-const COSMOS_ADDRESS_PREFIX = "cosmos"
-const COSMOS_HOME = ".hypergrid-ssn"
-const COSMOS_KEY = "my_key"
-const COSMOS_GAS = "100000000"
+// Default values for the global variables
+var SOLANA_RPC_ENDPOINT = "http://localhost:8899" //"https://devnet1.sonic.game" //
+var SOLANA_PRIVATE_KEY = "~/.config/solana/id.json"
+var COSMOS_RPC_ENDPOINT = "http://172.31.10.244:26657"
+var COSMOS_ADDRESS_PREFIX = "cosmos"
+var COSMOS_HOME = ".hypergrid-ssn"
+var COSMOS_KEY = "my_key"
+var COSMOS_GAS = "100000000"
 
 const AIDE_GET_BLOCKS_COUNT_LIMIT = uint64(200)
+
+// read variables from yaml file
+func readVariablesFromYaml(filename string) {
+	// Open the file
+	file, err := os.Open(filename)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	defer file.Close()
+
+	// Read the file
+	data, err := io.ReadAll(file)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	// Unmarshal the YAML
+	var params map[string]interface{}
+	err = yaml.Unmarshal(data, &params)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	// Print the params
+	log.Println(params)
+
+	// Set the global variables
+	SOLANA_RPC_ENDPOINT = params["solana_rpc"].(string)
+	SOLANA_PRIVATE_KEY = params["solana_private_key"].(string)
+	COSMOS_RPC_ENDPOINT = params["cosmos_rpc"].(string)
+	COSMOS_ADDRESS_PREFIX = params["cosmos_address_prefix"].(string)
+	COSMOS_HOME = params["cosmos_home"].(string)
+	COSMOS_KEY = params["cosmos_key"].(string)
+	COSMOS_GAS = params["cosmos_gas"].(string)
+
+	tools.COSMOS_ADDRESS_PREFIX = COSMOS_ADDRESS_PREFIX
+}
 
 func SendGridBlockFees(cosmos tools.CosmosClient, solana tools.SolanaClient, account cosmosaccount.Account, gridId string, limit uint64) {
 	first_available_slot, err := solana.GetFirstBlock()
@@ -116,6 +160,9 @@ func main() {
 		panic(err)
 		// os.Exit(1)
 	}
+
+	//read variables from yaml file
+	readVariablesFromYaml(home + "/.hypergrid-aide.yaml")
 
 	command := args[1]
 	switch command {

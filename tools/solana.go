@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/binary"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"sort"
@@ -17,6 +18,7 @@ import (
 	confirm "github.com/gagliardetto/solana-go/rpc/sendAndConfirmTransaction"
 	"github.com/gagliardetto/solana-go/rpc/ws"
 	"github.com/near/borsh-go"
+	"gopkg.in/yaml.v3"
 )
 
 func GetAccountInfo(rpcUrl string, address string) (*rpc.GetAccountInfoResult, error) {
@@ -137,21 +139,49 @@ func (d *InitializedParams) BorshEncode() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-const SonicFeeProgramID = "SonicFeeSet1ement11111111111111111111111111"
-const L1InboxProgramID = "5XJ1wZkTwAw9mc5FbM3eBgAT83TKgtAGzKos9wVxC6my"
+// global variables with default values
+var SonicFeeProgramID = "SonicFeeSet1ement11111111111111111111111111"
+var L1InboxProgramID = "5XJ1wZkTwAw9mc5FbM3eBgAT83TKgtAGzKos9wVxC6my"
+var LocalPrivateKey = "~/.config/solana/id.json"
+
+// read variables from yaml file
+func ReadVariablesFromYaml(filename string) {
+	// Open the file
+	file, err := os.Open(filename)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	defer file.Close()
+
+	// Read the file
+	data, err := io.ReadAll(file)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	// Unmarshal the YAML
+	var params map[string]interface{}
+	err = yaml.Unmarshal(data, &params)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	// Print the params
+	log.Println(params)
+
+	// Set the global variables
+	SonicFeeProgramID = params["SonicFeeProgramID"].(string)
+	L1InboxProgramID = params["L1InboxProgramID"].(string)
+	LocalPrivateKey = params["LocalPrivateKey"].(string)
+}
 
 func getLocalPrivateKey() (solana.PrivateKey, error) {
-	//get home path "~/"
-	home, err := os.UserHomeDir()
-	if err != nil {
-		// panic(err)
-		return nil, err
-	}
 	// Load the account that you will send funds FROM:
-	accountFrom, err := solana.PrivateKeyFromSolanaKeygenFile(home + "/.config/solana/id.json")
+	accountFrom, err := solana.PrivateKeyFromSolanaKeygenFile(LocalPrivateKey)
 
-	// Load the account that you will send funds FROM:
-	// accountFrom, err := solana.PrivateKeyFromBase58("5gA6JTpFziXu7py2j63arRUq1H29p6pcPMB74LaNuzcSqULPD6s1SZUS3UMPvFEE9oXmt1kk6ez3C6piTc3bwpJ6")
 	if err != nil {
 		// panic(err)
 		return nil, err
