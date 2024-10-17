@@ -7,6 +7,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"os"
+	"sort"
 	"strings"
 
 	"github.com/davecgh/go-spew/spew"
@@ -241,6 +242,11 @@ func SendTxFeeSettlement(rpcUrl string /*data_accounts []string,*/, FromId uint6
 			Amount: value,
 		})
 	}
+
+	//sort bills by key
+	sort.Slice(Bills, func(i, j int) bool {
+		return Bills[i].Key.String() < Bills[j].Key.String()
+	})
 
 	instructionData := SettleFeeBillParams{
 		Instruction: 1,

@@ -2,7 +2,6 @@ package tools
 
 import (
 	"context"
-	"fmt"
 	"hypergridssn/x/hypergridssn/types"
 	"log"
 	"strconv"
@@ -13,7 +12,7 @@ import (
 	// Importing the types package of your blog blockchain
 )
 
-const COSMOS_ADDRESS_PREFIX = "cosmos"
+var COSMOS_ADDRESS_PREFIX = "cosmos"
 
 type CosmosClient struct {
 	Context context.Context
@@ -21,7 +20,7 @@ type CosmosClient struct {
 }
 
 func NewCosmosClient(options ...cosmosclient.Option) *CosmosClient {
-	fmt.Println("NewCosmosClient")
+	log.Println("NewCosmosClient")
 	// Create a Cosmos client instance
 	ctx := context.Background()
 	cosmos, err := cosmosclient.New(ctx, options...)
@@ -44,7 +43,7 @@ func (c *CosmosClient) SendGridBlockFees(account cosmosaccount.Account, gridId s
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("Account: ", address)
+	log.Println("Account: ", address)
 
 	items := []*types.GridBlockFeeItem{}
 	for _, block := range blocks {
@@ -73,54 +72,54 @@ func (c *CosmosClient) SendGridBlockFees(account cosmosaccount.Account, gridId s
 			return nil, err
 		}
 		// Print response from broadcasting a transaction
-		fmt.Print("MsgCreateGridTxFee:\n\n")
-		fmt.Println(txResp)
+		log.Print("MsgCreateGridTxFee:\n\n")
+		log.Println(txResp)
 		return &txResp, nil
 	}
 	return nil, nil
 }
 
-func (c *CosmosClient) SendGridInbox(account cosmosaccount.Account, gridId string, block SolanaBlock) (*cosmosclient.Response, error) {
+// func (c *CosmosClient) SendGridInbox(account cosmosaccount.Account, gridId string, block SolanaBlock) (*cosmosclient.Response, error) {
+// 	address, err := account.Address(COSMOS_ADDRESS_PREFIX)
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// 	log.Println("Account: ", address)
+
+// 	// Define a message to create a grid inbox
+// 	msg := types.MsgCreateGridInbox{
+// 		Creator: address,
+// 		Grid:    gridId,
+// 		Slot:    strconv.FormatUint(block.Slot, 10),
+// 		Hash:    block.Blockhash,
+// 	}
+
+// 	// Broadcast a transaction from account `alice` with the message
+// 	// to create a post store response in txResp
+// 	txResp, err := c.Client.BroadcastTx(c.Context, account, &msg)
+// 	if err != nil {
+// 		log.Fatal(err)
+// 		return nil, err
+// 	}
+// 	// Print response from broadcasting a transaction
+// 	log.Print("MsgCreateGridTxFee:\n\n")
+// 	log.Println(txResp)
+
+// 	return &txResp, nil
+// }
+
+func (c *CosmosClient) SyncStateAccount(account cosmosaccount.Account, source string, pubkey string, version string) (*cosmosclient.Response, error) {
 	address, err := account.Address(COSMOS_ADDRESS_PREFIX)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("Account: ", address)
-
-	// Define a message to create a grid inbox
-	msg := types.MsgCreateGridInbox{
-		Creator: address,
-		Grid:    gridId,
-		Slot:    strconv.FormatUint(block.Slot, 10),
-		Hash:    block.Blockhash,
-	}
-
-	// Broadcast a transaction from account `alice` with the message
-	// to create a post store response in txResp
-	txResp, err := c.Client.BroadcastTx(c.Context, account, &msg)
-	if err != nil {
-		log.Fatal(err)
-		return nil, err
-	}
-	// Print response from broadcasting a transaction
-	fmt.Print("MsgCreateGridTxFee:\n\n")
-	fmt.Println(txResp)
-
-	return &txResp, nil
-}
-
-func (c *CosmosClient) SyncStateAccount(account cosmosaccount.Account, source string, pubkey string) (*cosmosclient.Response, error) {
-	address, err := account.Address(COSMOS_ADDRESS_PREFIX)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("Account: ", address)
+	log.Println("Account: ", address)
 
 	// Define a message to create a grid inbox
 	msg := types.MsgCreateSolanaAccount{
 		Creator: address,
 		Address: pubkey,
-		Version: "0",
+		Version: version,
 		Source:  source,
 	}
 
@@ -132,8 +131,8 @@ func (c *CosmosClient) SyncStateAccount(account cosmosaccount.Account, source st
 		return nil, err
 	}
 	// Print response from broadcasting a transaction
-	fmt.Print("MsgCreateSolanaAccount:\n\n")
-	fmt.Println(txResp)
+	log.Print("MsgCreateSolanaAccount:\n\n")
+	log.Println(txResp)
 
 	return &txResp, nil
 }
@@ -152,8 +151,8 @@ func (c *CosmosClient) QueryAllGridBlockFees() (*types.QueryAllGridBlockFeeRespo
 	}
 
 	// Print response from querying all the posts
-	fmt.Print("\n\nAll grid tx fee:\n\n")
-	fmt.Println(queryResp)
+	log.Print("\n\nAll grid tx fee:\n\n")
+	log.Println(queryResp)
 	return queryResp, err
 }
 
@@ -171,8 +170,8 @@ func (c *CosmosClient) QueryGridBlockFee(_id uint64) (*types.QueryGetGridBlockFe
 	}
 
 	// Print response from querying all the posts
-	fmt.Print("\n\nGet grid tx fee:\n\n")
-	fmt.Println(queryResp)
+	log.Print("\n\nGet grid tx fee:\n\n")
+	log.Println(queryResp)
 	return queryResp, err
 }
 
@@ -187,7 +186,7 @@ func (c *CosmosClient) QueryAllHypergridNodes() (*types.QueryAllHypergridNodeRes
 	}
 
 	// Print response from querying all the posts
-	fmt.Print("\n\nAll Hypergrid Nodes:\n\n")
-	fmt.Println(queryResp)
+	log.Print("\n\nAll Hypergrid Nodes:\n\n")
+	log.Println(queryResp)
 	return queryResp, err
 }

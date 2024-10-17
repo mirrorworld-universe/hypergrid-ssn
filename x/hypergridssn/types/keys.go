@@ -27,6 +27,7 @@ const (
 const (
 	GridBlockFeeKey      = "GridBlockFee/value/"
 	GridBlockFeeCountKey = "GridBlockFee/count/"
+	GridBlockhashKey     = "GridBlockFee/hash/"
 )
 
 const (
