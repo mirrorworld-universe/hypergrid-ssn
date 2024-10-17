@@ -7,11 +7,8 @@ import (
 
 	"hypergrid-ssn/x/hypergridssn/types"
 
-	solana "hypergrid-ssn/tools"
-
 	errorsmod "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 type Bill struct {
@@ -22,13 +19,6 @@ type Bill struct {
 
 func (k msgServer) CreateFeeSettlementBill(goCtx context.Context, msg *types.MsgCreateFeeSettlementBill) (*types.MsgCreateFeeSettlementBillResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-
-	// size := k.GetFeeSettlementBillCount(ctx)
-	// val, found := k.GetFeeSettlementBill(ctx, size-1)
-	// startId := uint64(0)
-	// if found {
-	// 	startId = val.EndId
-	// }
 
 	startId := msg.FromId
 
@@ -57,7 +47,8 @@ func (k msgServer) CreateFeeSettlementBill(goCtx context.Context, msg *types.Msg
 		Status:  0,
 	}
 
-	//todo: call sonic grid to settle the fee
+	/* move the logic to the client side
+
 	// get sonic grid node
 	sonic_grid_rpc := ""
 	// data_accounts := []string{}
@@ -76,12 +67,14 @@ func (k msgServer) CreateFeeSettlementBill(goCtx context.Context, msg *types.Msg
 		return nil, errorsmod.Wrap(sdkerrors.ErrKeyNotFound, "sonic grid rpc not found")
 	}
 
-	sig, err := solana.SendTxFeeSettlement(sonic_grid_rpc /* data_accounts,*/, feeSettlementBill.FromId, feeSettlementBill.EndId, bills)
+	//call sonic grid to settle the fee
+	sig, err := solana.SendTxFeeSettlement(sonic_grid_rpc, feeSettlementBill.FromId, feeSettlementBill.EndId, bills)
 	if err != nil {
 		return nil, errorsmod.Wrap(sdkerrors.ErrUnauthorized, err.Error())
 	}
 
 	println("solana signature: ", sig.String())
+	*/
 
 	id := k.AppendFeeSettlementBill(
 		ctx,
@@ -90,6 +83,6 @@ func (k msgServer) CreateFeeSettlementBill(goCtx context.Context, msg *types.Msg
 
 	return &types.MsgCreateFeeSettlementBillResponse{
 		Id:     id,
-		Txhash: sig.String(),
+		Txhash: "", //sig.String(),
 	}, nil
 }
