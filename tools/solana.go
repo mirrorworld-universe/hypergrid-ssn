@@ -23,9 +23,8 @@ import (
 
 // global variables with default values
 var SonicFeeProgramID = "SonicFeeSet1ement11111111111111111111111111"
-var L1InboxProgramID = "5XJ1wZkTwAw9mc5FbM3eBgAT83TKgtAGzKos9wVxC6my"
 var LocalPrivateKey = "~/.config/solana/id.json"
-var SonicStateOracleURL = "https://oracle.sonic.game"
+var SonicStateOracleURL = "https://nisaba-hssn.sonic.game"
 
 // read variables from yaml file
 func ReadVariablesFromYaml(filename string) {
@@ -57,7 +56,6 @@ func ReadVariablesFromYaml(filename string) {
 
 	// Set the global variables
 	SonicFeeProgramID = params["SonicFeeProgramID"].(string)
-	L1InboxProgramID = params["L1InboxProgramID"].(string)
 	LocalPrivateKey = params["LocalPrivateKey"].(string)
 	SonicStateOracleURL = params["SonicStateOracleURL"].(string)
 }
