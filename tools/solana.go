@@ -5,7 +5,10 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/binary"
+	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"sort"
 	"strings"
@@ -16,7 +19,104 @@ import (
 	confirm "github.com/gagliardetto/solana-go/rpc/sendAndConfirmTransaction"
 	"github.com/gagliardetto/solana-go/rpc/ws"
 	"github.com/near/borsh-go"
+	"gopkg.in/yaml.v3"
 )
+
+var SonicFeeProgramID = "SonicFeeSet1ement11111111111111111111111111"
+var SonicFeeDataAccountID = "SonicFeeSet1ementData1111111111111111111112"
+var L1InboxProgramID = "FG8P631H9q5b53qsVM9aD71GZTWBKvujtqeWUGstpeka"
+var SonicStateOracleURL = "https://nisaba-hssn.sonia.game"
+var SonicPrivateKey = "~/.config/solana/id.json"
+var loaded = false
+
+// read variables from yaml file
+func ReadVariablesFromYaml(filename string) {
+	if loaded {
+		return
+	}
+
+	home, err := os.UserHomeDir()
+	if err != nil {
+		home = "."
+	}
+
+	filepath := home + "/" + filename
+	//check if file exists
+	if _, err := os.Stat(filepath); os.IsNotExist(err) {
+		filepath = "./" + filename
+	}
+
+	fmt.Println("Reading variables from", filepath)
+
+	// Open the file
+	file, err := os.Open(filepath)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer file.Close()
+
+	// Read the file
+	data, err := io.ReadAll(file)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	// Unmarshal the YAML
+	var params map[string]interface{}
+	err = yaml.Unmarshal(data, &params)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	// Print the params
+	fmt.Println(params)
+
+	// Set the global variables
+	solana_params := params["sonic"].(map[string]interface{})
+	SonicFeeProgramID = solana_params["fee_program_id"].(string)
+	SonicFeeDataAccountID = solana_params["fee_data_account_id"].(string)
+	SonicPrivateKey = solana_params["private_key"].(string)
+	SonicStateOracleURL = solana_params["state_oracle_url"].(string)
+	L1InboxProgramID = solana_params["inbox_program_id"].(string)
+
+	loaded = true
+}
+
+// Get account info from oracle
+func GetAccountFromOracle(rpcUrl string, address string, version string) (*rpc.GetAccountInfoResult, error) {
+	// read variables from yaml file
+	ReadVariablesFromYaml(".hypergrid.yaml")
+
+	// call http client to get account info from oracle
+	client := &http.Client{}
+	reqBody := fmt.Sprintf(`{"rpc": "%s", "address": "%s", "version": "%s"}`, rpcUrl, address, version)
+	req, err := http.NewRequest("POST", SonicStateOracleURL, bytes.NewBuffer([]byte(reqBody)))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("failed to get account info: %s", resp.Status)
+	}
+
+	var result rpc.GetAccountInfoResult
+	err = json.NewDecoder(resp.Body).Decode(&result)
+	if err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
 
 func GetAccountInfo(rpcUrl string, address string) (*rpc.GetAccountInfoResult, error) {
 	// endpoint := rpc.DevNet_RPC //MainNetBeta_RPC
@@ -53,17 +153,6 @@ func GetAccountInfo(rpcUrl string, address string) (*rpc.GetAccountInfoResult, e
 
 	// return jsonBytes, err
 
-}
-
-func RequestAirdrop(rpcUrl string, address string, amount uint64) {
-	// endpoint := rpc.DevNet_RPC //MainNetBeta_RPC
-	client := rpc.New(rpcUrl)
-	pubKey := solana.MustPublicKeyFromBase58(address) // serum token
-	out, err := client.RequestAirdrop(context.TODO(), pubKey, amount, rpc.CommitmentFinalized)
-	if err != nil {
-		panic(err)
-	}
-	spew.Dump(out)
 }
 
 type SettlementBillParam struct {
@@ -136,22 +225,9 @@ func (d *InitializedParams) BorshEncode() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-const SonicFeeProgramID = "SonicFeeSet1ement11111111111111111111111111"
-const SonicFeeDataAccountID = "SonicFeeSet1ementData1111111111111111111112"
-const L1InboxProgramID = "5XJ1wZkTwAw9mc5FbM3eBgAT83TKgtAGzKos9wVxC6my"
-
 func getLocalPrivateKey() (solana.PrivateKey, error) {
-	//get home path "~/"
-	home, err := os.UserHomeDir()
-	if err != nil {
-		// panic(err)
-		return nil, err
-	}
 	// Load the account that you will send funds FROM:
-	accountFrom, err := solana.PrivateKeyFromSolanaKeygenFile(home + "/.config/solana/id.json")
-
-	// Load the account that you will send funds FROM:
-	// accountFrom, err := solana.PrivateKeyFromBase58("5gA6JTpFziXu7py2j63arRUq1H29p6pcPMB74LaNuzcSqULPD6s1SZUS3UMPvFEE9oXmt1kk6ez3C6piTc3bwpJ6")
+	accountFrom, err := solana.PrivateKeyFromSolanaKeygenFile(SonicPrivateKey)
 	if err != nil {
 		// panic(err)
 		return nil, err
@@ -178,7 +254,7 @@ func sendSonicTx(rpcUrl string, programId string, accounts solana.AccountMetaSli
 		return nil, err
 	}
 
-	recent, err := rpcClient.GetRecentBlockhash(context.TODO(), rpc.CommitmentFinalized)
+	recent, err := rpcClient.GetLatestBlockhash(context.TODO(), rpc.CommitmentFinalized)
 	if err != nil {
 		// panic(err)
 		return nil, err

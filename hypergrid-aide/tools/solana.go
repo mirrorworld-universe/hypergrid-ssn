@@ -3,6 +3,7 @@ package tools
 import (
 	"context"
 	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"log"
 	"strings"
@@ -59,6 +60,7 @@ func (s *SolanaClient) GetIdentity() (*rpc.GetIdentityResult, error) {
 func (s *SolanaClient) GetFirstBlock() (uint64, error) {
 	resp, err := s.Client.GetBlocksWithLimit(context.TODO(), 0, 1, rpc.CommitmentFinalized)
 	if err != nil {
+		log.Println("error: ", err.Error())
 		return 0, err
 	}
 	if len(*resp) > 0 {
@@ -70,21 +72,36 @@ func (s *SolanaClient) GetFirstBlock() (uint64, error) {
 func (s *SolanaClient) GetLastBlock() (SolanaBlock, error) {
 	resp, err := s.Client.GetBlockHeight(context.TODO(), rpc.CommitmentFinalized)
 	if err != nil {
+		log.Println("error: ", err.Error())
 		return SolanaBlock{}, err
 	}
-	resp2, err := s.Client.GetBlock(context.TODO(), resp)
+	ver := uint64(0)
+	resp2, err := s.Client.GetBlockWithOpts(context.TODO(), resp, &rpc.GetBlockOpts{MaxSupportedTransactionVersion: &ver})
 	if err != nil {
+		log.Println("error: ", err.Error())
 		return SolanaBlock{}, err
 	}
 
 	block := SolanaBlock{
 		Blockhash: resp2.Blockhash.String(),
 		Slot:      resp,
-		BlockTime: resp2.BlockTime.Time().Second(),
+		BlockTime: int(resp2.BlockTime.Time().Unix()),
 	}
+
+	log.Println("block: ", block)
 
 	return block, nil
 
+}
+
+func (s *SolanaClient) GetGenesisHash() (string, error) {
+	resp, err := s.Client.GetGenesisHash(context.TODO())
+	if err != nil {
+		log.Println("error: ", err.Error())
+		return "", err
+	}
+	log.Println("genesis hash: ", resp.String())
+	return resp.String(), nil
 }
 
 func (s *SolanaClient) GetBlocks(start_slot uint64, limit uint64) ([]SolanaBlock, uint64, error) {
@@ -92,6 +109,7 @@ func (s *SolanaClient) GetBlocks(start_slot uint64, limit uint64) ([]SolanaBlock
 	resp, err := s.Client.GetBlocksWithLimit(context.TODO(), start_slot, limit, rpc.CommitmentFinalized)
 
 	if err != nil {
+		log.Println("error: ", err.Error())
 		return nil, 0, err
 	}
 
@@ -99,14 +117,16 @@ func (s *SolanaClient) GetBlocks(start_slot uint64, limit uint64) ([]SolanaBlock
 	blocks := []SolanaBlock{}
 	rewards := true
 	latest_slot := uint64(0)
+	version := uint64(0)
 	for _, block := range *resp {
 		log.Println("block: ", block)
 		latest_slot = block
 		resp2, err := s.Client.GetBlockWithOpts(context.TODO(), block, &rpc.GetBlockOpts{
 			// Encoding:           solana.EncodingJSONParsed,
-			Commitment:         rpc.CommitmentFinalized,
-			TransactionDetails: rpc.TransactionDetailsFull,
-			Rewards:            &rewards,
+			Commitment:                     rpc.CommitmentFinalized,
+			TransactionDetails:             rpc.TransactionDetailsFull,
+			Rewards:                        &rewards,
+			MaxSupportedTransactionVersion: &version,
 		})
 		if err != nil {
 			log.Println("error: ", err.Error())
@@ -176,18 +196,15 @@ func (s *SolanaClient) GetAccountInfo(address string) (*rpc.GetAccountInfoResult
 	)
 }
 
-var L1InboxProgramID = "5XJ1wZkTwAw9mc5FbM3eBgAT83TKgtAGzKos9wVxC6my"
-var LocalPrivateKey = "~/.config/solana/id.json"
-
-func getLocalPrivateKey() (solana.PrivateKey, error) {
+func getLocalPrivateKey(localPrivateKey string) (solana.PrivateKey, error) {
 	// Load the account that you will send funds FROM:
-	accountFrom, err := solana.PrivateKeyFromSolanaKeygenFile(LocalPrivateKey)
+	accountFrom, err := solana.PrivateKeyFromSolanaKeygenFile(localPrivateKey)
 
 	if err != nil {
-		// panic(err)
+		log.Println("error: ", err.Error())
 		return nil, err
 	}
-	log.Println("accountFrom private key:", accountFrom)
+	// log.Println("accountFrom private key:", accountFrom)
 	log.Println("accountFrom public key:", accountFrom.PublicKey())
 
 	return accountFrom, nil
@@ -219,6 +236,7 @@ type InboxProgrmParams struct {
 	Instruction [8]byte
 	Slot        uint64
 	Hash        string
+	From        string
 }
 
 func hashInstructionMethod(method string) [8]byte {
@@ -232,6 +250,7 @@ func hashInstructionMethod(method string) [8]byte {
 }
 
 func sendSonicTx(rpcUrl string, programId string, accounts solana.AccountMetaSlice, instructionData []byte, signers []solana.PrivateKey) (*solana.Signature, error) {
+	log.Println("sendSonicTx:", rpcUrl, programId, accounts, instructionData, signers)
 	// Create a new RPC client:
 	rpcClient := rpc.New(rpcUrl)
 
@@ -243,13 +262,13 @@ func sendSonicTx(rpcUrl string, programId string, accounts solana.AccountMetaSli
 
 	wsClient, err := ws.Connect(context.Background(), rpcWsUrl)
 	if err != nil {
-		// panic(err)
+		log.Println("error: ", err.Error())
 		return nil, err
 	}
 
-	recent, err := rpcClient.GetRecentBlockhash(context.TODO(), rpc.CommitmentFinalized)
+	recent, err := rpcClient.GetLatestBlockhash(context.TODO(), rpc.CommitmentFinalized)
 	if err != nil {
-		// panic(err)
+		log.Println("error: ", err.Error())
 		return nil, err
 	}
 
@@ -265,7 +284,7 @@ func sendSonicTx(rpcUrl string, programId string, accounts solana.AccountMetaSli
 		solana.TransactionPayer(signers[0].PublicKey()),
 	)
 	if err != nil {
-		// panic(err)
+		log.Println("error: ", err.Error())
 		return nil, err
 	}
 
@@ -276,16 +295,12 @@ func sendSonicTx(rpcUrl string, programId string, accounts solana.AccountMetaSli
 				return &signer
 			}
 		}
-		// if accountFrom.PublicKey().Equals(key) {
-		// 	return &accountFrom
-		// }
 		return nil
 	})
 	if err != nil {
-		// panic(fmt.Errorf("unable to sign transaction: %w", err))
+		log.Println(fmt.Errorf("unable to sign transaction: %w", err))
 		return nil, err
 	}
-	spew.Dump(tx)
 
 	// Send transaction, and wait for confirmation:
 	sig, err := confirm.SendAndConfirmTransaction(
@@ -295,56 +310,64 @@ func sendSonicTx(rpcUrl string, programId string, accounts solana.AccountMetaSli
 		tx,
 	)
 	if err != nil {
-		// panic(err)
+		log.Println("error: ", err.Error())
 		return nil, err
 	}
 	spew.Dump(sig)
 	return &sig, nil
 }
 
-func SendTxInbox(rpcUrl string, slot uint64, hash string) (*solana.Signature, *solana.PublicKey, error) {
+func SendTxInbox(localPrivateKey string, rpcUrl string, programId string, slot uint64, hash string, from string) (*solana.Signature, error) {
+	log.Println("SendTxInbox:", rpcUrl, programId, slot, hash, from)
 	instructionData := InboxProgrmParams{
 		Instruction: hashInstructionMethod("addblock"),
 		Slot:        slot,
 		Hash:        hash,
+		From:        from,
 	}
+
+	log.Println("instructionData:", instructionData)
 
 	// Serialize to bytes using Borsh
 	serializedData, err := borsh.Serialize(instructionData)
 	if err != nil {
-		// panic(err)
-		return nil, nil, err
+		log.Println("error: ", err.Error())
+		return nil, err
 	}
 
-	//create a new keypair
-	data_account, err := solana.NewRandomPrivateKey()
-	if err != nil {
-		// panic(err)
-		return nil, nil, err
-	}
-	data_key := data_account.PublicKey()
-	log.Println("data_account:", data_key)
+	// log.Println("serializedData:", serializedData)
+	//convert serializedData to hex
+	log.Println("serializedData hex:", hex.EncodeToString(serializedData))
 
-	signer, err := getLocalPrivateKey()
+	// // create a new keypair
+	// data_account, err := solana.NewRandomPrivateKey()
+	// if err != nil {
+	// 	log.Println("error: ", err.Error())
+	// 	return nil, err
+	// }
+	// data_key := data_account.PublicKey()
+	// log.Println("data_account:", data_key)
+
+	signer, err := getLocalPrivateKey(localPrivateKey)
 	if err != nil {
-		// panic(err)
-		return nil, nil, err
+		log.Println("error: ", err.Error())
+		return nil, err
 	}
 
 	accounts := solana.AccountMetaSlice{
-		solana.NewAccountMeta(data_account.PublicKey(), true, true),
-		solana.NewAccountMeta(signer.PublicKey(), true, true),
-		solana.NewAccountMeta(solana.MustPublicKeyFromBase58("11111111111111111111111111111111"), false, false),
+		// solana.NewAccountMeta(data_account.PublicKey(), false, true),
+		solana.NewAccountMeta(signer.PublicKey(), false, true),
+		// solana.NewAccountMeta(solana.MustPublicKeyFromBase58("11111111111111111111111111111111"), false, false),
 	}
 
-	signers := []solana.PrivateKey{signer, data_account}
+	signers := []solana.PrivateKey{signer} //, data_account}
 
-	sig, err := sendSonicTx(rpcUrl, L1InboxProgramID, accounts, serializedData, signers)
+	sig, err := sendSonicTx(rpcUrl, programId, accounts, serializedData, signers)
 	if err != nil {
-		// panic(err)
-		return nil, nil, err
+		log.Println("error: ", err.Error())
+		return nil, err
 	}
 	log.Println("signature: ", sig)
 
-	return sig, &data_key, nil
+	return sig, nil
 }

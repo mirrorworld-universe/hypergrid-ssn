@@ -11,6 +11,7 @@ import (
 	"hypergrid-aide/tools"
 
 	// Importing the general purpose Cosmos blockchain client
+
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosaccount"
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
 	"gopkg.in/yaml.v3"
@@ -19,20 +20,34 @@ import (
 
 // Default values for the global variables
 var SOLANA_RPC_ENDPOINT = "http://localhost:8899"
-var SOLANA_BASELAYER_RPC = "https://api.devnet.solana.com"
+var SOLANA_BASELAYER_RPC = "https://api.testnet.solana.com"
 var SOLANA_PRIVATE_KEY = "~/.config/solana/id.json"
-var COSMOS_RPC_ENDPOINT = "http://172.31.10.244:26657"
+var SOLANA_InboxProgramID = "FG8P631H9q5b53qsVM9aD71GZTWBKvujtqeWUGstpeka"
+var COSMOS_RPC_ENDPOINT = "http://localhost:26657"
 var COSMOS_ADDRESS_PREFIX = "cosmos"
-var COSMOS_HOME = ".hypergrid-ssn"
+var COSMOS_HOME = "~/.hypergrid-ssn"
 var COSMOS_KEY = "my_key"
-var COSMOS_GAS = "100000000"
+var COSMOS_GAS = uint64(100000000)
 
 const AIDE_GET_BLOCKS_COUNT_LIMIT = uint64(200)
 
 // read variables from yaml file
 func readVariablesFromYaml(filename string) {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		home = "."
+	}
+
+	filepath := home + "/" + filename
+	//check if file exists
+	if _, err := os.Stat(filepath); os.IsNotExist(err) {
+		filepath = "./" + filename
+	}
+
+	fmt.Println("Reading variables from", filepath)
+
 	// Open the file
-	file, err := os.Open(filename)
+	file, err := os.Open(filepath)
 	if err != nil {
 		log.Println(err)
 		return
@@ -58,19 +73,23 @@ func readVariablesFromYaml(filename string) {
 	log.Println(params)
 
 	// Set the global variables
-	SOLANA_RPC_ENDPOINT = params["solana_rpc"].(string)
-	SOLANA_BASELAYER_RPC = params["solana_baselayer_rpc"].(string)
-	SOLANA_PRIVATE_KEY = params["solana_private_key"].(string)
-	COSMOS_RPC_ENDPOINT = params["cosmos_rpc"].(string)
-	COSMOS_ADDRESS_PREFIX = params["cosmos_address_prefix"].(string)
-	COSMOS_HOME = params["cosmos_home"].(string)
-	COSMOS_KEY = params["cosmos_key"].(string)
-	COSMOS_GAS = params["cosmos_gas"].(string)
+	solana_params := params["solana"].(map[string]interface{})
+	SOLANA_RPC_ENDPOINT = solana_params["rpc"].(string)
+	SOLANA_BASELAYER_RPC = solana_params["baselayer_rpc"].(string)
+	SOLANA_PRIVATE_KEY = solana_params["private_key"].(string)
+	SOLANA_InboxProgramID = solana_params["inbox_program_id"].(string)
 
+	cosmos_params := params["cosmos"].(map[string]interface{})
+	COSMOS_RPC_ENDPOINT = cosmos_params["rpc"].(string)
+	COSMOS_ADDRESS_PREFIX = cosmos_params["address_prefix"].(string)
+	COSMOS_HOME = cosmos_params["home"].(string)
+	COSMOS_KEY = cosmos_params["key"].(string)
+	COSMOS_GAS = uint64(cosmos_params["gas"].(int))
 	tools.COSMOS_ADDRESS_PREFIX = COSMOS_ADDRESS_PREFIX
 }
 
 func SendGridBlockFees(cosmos tools.CosmosClient, solana tools.SolanaClient, account cosmosaccount.Account, gridId string, limit uint64) {
+	log.Println("SendGridBlockFees:", gridId)
 	first_available_slot, err := solana.GetFirstBlock()
 	if err != nil {
 		log.Fatal(err)
@@ -100,8 +119,8 @@ func SendGridBlockFees(cosmos tools.CosmosClient, solana tools.SolanaClient, acc
 		log.Println("SendGridBlockFees")
 		resp, err_send := cosmos.SendGridBlockFees(account, gridId, blocks)
 		if err_send != nil {
-			log.Fatal(err_send)
 			log.Println("SendGridBlockFees fail")
+			log.Fatal(err_send)
 		} else {
 			log.Println("SendGridBlockFees success")
 			last_sent_slot = latest_slot //blocks[len(blocks)-1].Slot
@@ -109,7 +128,6 @@ func SendGridBlockFees(cosmos tools.CosmosClient, solana tools.SolanaClient, acc
 			if err != nil {
 				log.Fatal(err)
 			}
-
 		}
 		log.Print("MsgCreateGridTxFee:", resp)
 	} else {
@@ -128,7 +146,12 @@ func SendGridInbox(solana tools.SolanaClient) {
 		log.Fatal(err)
 	}
 
-	tools.SendTxInbox(SOLANA_BASELAYER_RPC, block.Slot, block.Blockhash)
+	genesis_hash, err := solana.GetGenesisHash()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	tools.SendTxInbox(SOLANA_PRIVATE_KEY, SOLANA_BASELAYER_RPC, SOLANA_InboxProgramID, block.Slot, block.Blockhash, genesis_hash)
 }
 
 func SyncStateAccount(cosmos tools.CosmosClient, account cosmosaccount.Account, source string, pubkey string, version string) {
@@ -141,6 +164,7 @@ func SyncStateAccount(cosmos tools.CosmosClient, account cosmosaccount.Account, 
 }
 
 func main() {
+	log.SetFlags(log.Llongfile | log.Lmicroseconds | log.Ldate)
 	//get program arguments
 	args := os.Args
 	if len(args) < 2 {
@@ -148,14 +172,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	home, err := os.UserHomeDir()
-	if err != nil {
-		panic(err)
-		// os.Exit(1)
-	}
-
 	//read variables from yaml file
-	readVariablesFromYaml(home + "/.hypergrid-aide.yaml")
+	readVariablesFromYaml(".hypergrid-aide.yaml")
 
 	command := args[1]
 	switch command {
@@ -167,11 +185,14 @@ func main() {
 		source := args[2]
 		pubkey := args[3]
 		version := args[4]
+
+		//convert COSMOS_GAS to string
+		// gas_str := strconv.FormatUint(COSMOS_GAS, 10)
 		cosmos := tools.NewCosmosClient(
 			cosmosclient.WithNodeAddress(COSMOS_RPC_ENDPOINT),
 			cosmosclient.WithAddressPrefix(COSMOS_ADDRESS_PREFIX),
-			cosmosclient.WithHome(home+"/"+COSMOS_HOME),
-			cosmosclient.WithGas(COSMOS_GAS),
+			cosmosclient.WithHome(COSMOS_HOME),
+			cosmosclient.WithGas(strconv.FormatUint(COSMOS_GAS, 10)),
 		)
 		account, err := cosmos.Account(COSMOS_KEY)
 		if err != nil {
@@ -196,19 +217,25 @@ func main() {
 		cosmos := tools.NewCosmosClient(
 			cosmosclient.WithNodeAddress(COSMOS_RPC_ENDPOINT),
 			cosmosclient.WithAddressPrefix(COSMOS_ADDRESS_PREFIX),
-			cosmosclient.WithHome(home+"/"+COSMOS_HOME),
-			cosmosclient.WithGas(COSMOS_GAS),
+			cosmosclient.WithHome(COSMOS_HOME),
+			cosmosclient.WithGas(strconv.FormatUint(COSMOS_GAS, 10)),
 		)
 		solana := tools.NewSolanaClient(SOLANA_RPC_ENDPOINT)
 		account, err := cosmos.Account(COSMOS_KEY)
 		if err != nil {
+			log.Println("Account fail:", err)
 			log.Fatal(err)
 		}
-		resp, err := solana.GetIdentity()
+		// resp, err := solana.GetIdentity()
+		// if err != nil {
+		// 	log.Fatal(err)
+		// }
+		// gridId := resp.Identity.String()
+
+		gridId, err := solana.GetGenesisHash()
 		if err != nil {
 			log.Fatal(err)
 		}
-		gridId := resp.Identity.String()
 		SendGridBlockFees(*cosmos, *solana, account, gridId, limit)
 		// break
 	default:
