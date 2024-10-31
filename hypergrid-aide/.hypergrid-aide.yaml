@@ -1,0 +1,11 @@
+solana:
+  rpc: http://localhost:8899
+  baselayer_rpc: https://api.testnet.solana.com
+  private_key: ~/.config/solana/id.json
+  inbox_program_id: FG8P631H9q5b53qsVM9aD71GZTWBKvujtqeWUGstpeka
+cosmos:
+  rpc: https://api.testnet.hssn.sonic.game/
+  address_prefix: cosmos
+  home: .hypergrid-ssn
+  key: my_key
+  gas: 100000000

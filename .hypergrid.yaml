@@ -1,0 +1,6 @@
+sonic:
+  fee_program_id: SonicFeeSet1ement11111111111111111111111111
+  fee_data_account_id: SonicFeeSet1ementData1111111111111111111112
+  private_key: ~/.config/solana/id.json
+  state_oracle_url: https://nisaba-hssn.sonia.game
+  inbox_program_id: FG8P631H9q5b53qsVM9aD71GZTWBKvujtqeWUGstpeka
