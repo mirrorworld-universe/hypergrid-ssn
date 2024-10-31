@@ -1,1 +1,2 @@
-Here is the source code for the Shared Sequencer Network's development version.
+Here is the source code for Nisaba service for HSSN.
+The online RPC url:  https://nisaba-hssn.sonic.game
