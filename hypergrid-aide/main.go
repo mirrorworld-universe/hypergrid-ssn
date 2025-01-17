@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -21,8 +22,11 @@ import (
 // Default values for the global variables
 var SOLANA_RPC_ENDPOINT = "http://localhost:8899"
 var SOLANA_BASELAYER_RPC = "https://api.testnet.solana.com"
+var SOLANA_SONIC_GRID_RPC = "http://api.grid-sonic.sonic.game"
 var SOLANA_PRIVATE_KEY = "~/.config/solana/id.json"
 var SOLANA_InboxProgramID = "FG8P631H9q5b53qsVM9aD71GZTWBKvujtqeWUGstpeka"
+var SonicFeeProgramID = "SonicFeeSet1ement11111111111111111111111111"
+var SonicFeeDataAccountID = "SonicFeeSet1ementData1111111111111111111112"
 var COSMOS_RPC_ENDPOINT = "http://localhost:26657"
 var COSMOS_ADDRESS_PREFIX = "cosmos"
 var COSMOS_HOME = "~/.hypergrid-ssn"
@@ -78,6 +82,9 @@ func readVariablesFromYaml(filename string) {
 	SOLANA_BASELAYER_RPC = solana_params["baselayer_rpc"].(string)
 	SOLANA_PRIVATE_KEY = solana_params["private_key"].(string)
 	SOLANA_InboxProgramID = solana_params["inbox_program_id"].(string)
+	SOLANA_SONIC_GRID_RPC = solana_params["sonic_grid_rpc"].(string)
+	SonicFeeProgramID = solana_params["fee_program_id"].(string)
+	SonicFeeDataAccountID = solana_params["fee_data_account_id"].(string)
 
 	cosmos_params := params["cosmos"].(map[string]interface{})
 	COSMOS_RPC_ENDPOINT = cosmos_params["rpc"].(string)
@@ -163,6 +170,60 @@ func SyncStateAccount(cosmos tools.CosmosClient, account cosmosaccount.Account, 
 	log.Println(res)
 }
 
+func SettleFeeBill(cosmos tools.CosmosClient, account cosmosaccount.Account) {
+	fromId := uint64(0)
+	endId := uint64(0)
+
+	res1, err1 := cosmos.QueryLastFeeSettlementBill()
+	if err1 != nil {
+		log.Fatal(err1)
+	}
+	if len(res1.FeeSettlementBill) > 0 {
+		// Id = res1.FeeSettlementBill[0].Id
+		fromId = res1.FeeSettlementBill[0].EndId
+	}
+
+	res2, err2 := cosmos.QueryLastGridBlockFee()
+	if err2 != nil {
+		log.Fatal(err1)
+	}
+	if len(res2.GridBlockFee) > 0 {
+		// Id = res1.FeeSettlementBill[0].Id
+		endId = res2.GridBlockFee[0].Id
+	}
+
+	if fromId == 0 && endId == 0 {
+		log.Fatal("fromId or endId is 0")
+		return
+	}
+
+	res, err := cosmos.SettleFeeBill(account, fromId, endId)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Print("SettleFeeBill:\n\n")
+	log.Println(res)
+
+	res3, err3 := cosmos.QueryLastFeeSettlementBill()
+	if err3 != nil {
+		log.Fatal(err3)
+	}
+
+	bills := res3.FeeSettlementBill[0].Bill
+	//convert bills to bytes
+	// billsBytes := []byte(bills)
+	var Bills map[string]uint64
+	json.Unmarshal([]byte(bills), &Bills)
+
+	res4, err4 := tools.SendTxFeeSettlement(SOLANA_PRIVATE_KEY, SOLANA_SONIC_GRID_RPC, SonicFeeProgramID, SonicFeeDataAccountID, res3.FeeSettlementBill[0].FromId, res3.FeeSettlementBill[0].EndId, Bills)
+	if err4 != nil {
+		log.Fatal(err4)
+	}
+
+	log.Print("SendTxFeeSettlement:\n\n")
+	log.Println(res4)
+}
+
 func main() {
 	log.SetFlags(log.Llongfile | log.Lmicroseconds | log.Ldate)
 	//get program arguments
@@ -238,6 +299,18 @@ func main() {
 		}
 		SendGridBlockFees(*cosmos, *solana, account, gridId, limit)
 		// break
+	case "settle":
+		cosmos := tools.NewCosmosClient(
+			cosmosclient.WithNodeAddress(COSMOS_RPC_ENDPOINT),
+			cosmosclient.WithAddressPrefix(COSMOS_ADDRESS_PREFIX),
+			cosmosclient.WithHome(COSMOS_HOME),
+			cosmosclient.WithGas(strconv.FormatUint(COSMOS_GAS, 10)),
+		)
+		account, err := cosmos.Account(COSMOS_KEY)
+		if err != nil {
+			log.Fatal(err)
+		}
+		SettleFeeBill(*cosmos, account)
 	default:
 		fmt.Println("Usage: hypergrid-aide <command>")
 	}
