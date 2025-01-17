@@ -1,11 +1,14 @@
 package tools
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha256"
+	"encoding/binary"
 	"encoding/hex"
 	"fmt"
 	"log"
+	"sort"
 	"strings"
 
 	"github.com/davecgh/go-spew/spew"
@@ -370,4 +373,92 @@ func SendTxInbox(localPrivateKey string, rpcUrl string, programId string, slot u
 	log.Println("signature: ", sig)
 
 	return sig, nil
+}
+
+type SettlementBillParam struct {
+	Key    solana.PublicKey
+	Amount uint64
+}
+
+type SettleFeeBillParams struct {
+	Instruction uint32
+	FromID      uint64
+	EndID       uint64
+	Bills       []SettlementBillParam
+}
+
+// BorshEncode encodes the InstructionData using Borsh
+func (d *SettleFeeBillParams) BorshEncode() ([]byte, error) {
+	buf := new(bytes.Buffer)
+	err := binary.Write(buf, binary.LittleEndian, d.Instruction)
+	if err != nil {
+		return nil, err
+	}
+	err = binary.Write(buf, binary.LittleEndian, d.FromID)
+	if err != nil {
+		return nil, err
+	}
+	err = binary.Write(buf, binary.LittleEndian, d.EndID)
+	if err != nil {
+		return nil, err
+	}
+	billCount := uint64(len(d.Bills))
+	err = binary.Write(buf, binary.LittleEndian, billCount)
+	if err != nil {
+		return nil, err
+	}
+	for _, bill := range d.Bills {
+		err = binary.Write(buf, binary.LittleEndian, bill.Key[:])
+		if err != nil {
+			return nil, err
+		}
+		err = binary.Write(buf, binary.LittleEndian, bill.Amount)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return buf.Bytes(), nil
+}
+
+func SendTxFeeSettlement(localPrivateKey string, rpcUrl string, SonicFeeProgramID string, SonicFeeDataAccountID string, FromId uint64, EndID uint64, bills map[string]uint64) (*solana.Signature, error) {
+	Bills := []SettlementBillParam{}
+	// convert bills to []SettlementBillParam
+	for key, value := range bills {
+		Bills = append(Bills, SettlementBillParam{
+			Key:    solana.MustPublicKeyFromBase58(key),
+			Amount: value,
+		})
+	}
+
+	//sort bills by key
+	sort.Slice(Bills, func(i, j int) bool {
+		return Bills[i].Key.String() < Bills[j].Key.String()
+	})
+
+	instructionData := SettleFeeBillParams{
+		Instruction: 1,
+		FromID:      FromId,
+		EndID:       EndID,
+		Bills:       Bills,
+	}
+
+	// Serialize to bytes using Borsh
+	serializedData, err := instructionData.BorshEncode() // borsh.Serialize(instructionData)
+	if err != nil {
+		// panic(err)
+		return nil, err
+	}
+
+	accounts := solana.AccountMetaSlice{
+		solana.NewAccountMeta(solana.MustPublicKeyFromBase58(SonicFeeDataAccountID), true, false),
+	}
+
+	signer, err := getLocalPrivateKey(localPrivateKey)
+	if err != nil {
+		// panic(err)
+		return nil, err
+	}
+
+	signers := []solana.PrivateKey{signer}
+	return sendSonicTx(rpcUrl, SonicFeeProgramID, accounts, serializedData, signers)
 }

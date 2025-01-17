@@ -3,6 +3,9 @@ solana:
   baselayer_rpc: https://api.testnet.solana.com
   private_key: ~/.config/solana/id.json
   inbox_program_id: FG8P631H9q5b53qsVM9aD71GZTWBKvujtqeWUGstpeka
+  sonic_grid_rpc: http://api.grid-sonic.sonic.game
+  fee_program_id: SonicFeeSet1ement11111111111111111111111111
+  fee_data_account_id: SonicFeeSet1ementData1111111111111111111112
 cosmos:
   rpc: https://api.testnet.hssn.sonic.game/
   address_prefix: cosmos

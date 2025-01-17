@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	// Importing the general purpose Cosmos blockchain client
+	"github.com/cosmos/cosmos-sdk/types/query"
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosaccount"
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
 	// Importing the types package of your blog blockchain
@@ -156,6 +157,28 @@ func (c *CosmosClient) QueryAllGridBlockFees() (*types.QueryAllGridBlockFeeRespo
 	return queryResp, err
 }
 
+func (c *CosmosClient) QueryLastGridBlockFee() (*types.QueryAllGridBlockFeeResponse, error) {
+	// Instantiate a query client for your `blog` blockchain
+	queryClient := types.NewQueryClient(c.Client.Context())
+
+	// Query the blockchain using the client's `PostAll` method
+	// to get all posts store all posts in queryResp
+	// return queryClient.GridBlockFeeAll(c.Context, &types.QueryAllGridBlockFeeRequest{})
+	queryResp, err := queryClient.GridBlockFeeAll(c.Context, &types.QueryAllGridBlockFeeRequest{Pagination: &query.PageRequest{
+		Limit:   1,
+		Reverse: true,
+	}})
+	if err != nil {
+		log.Fatal(err)
+		return nil, err
+	}
+
+	// Print response from querying all the posts
+	log.Print("\n\nAll grid tx fee:\n\n")
+	log.Println(queryResp)
+	return queryResp, err
+}
+
 func (c *CosmosClient) QueryGridBlockFee(_id uint64) (*types.QueryGetGridBlockFeeResponse, error) {
 	// Instantiate a query client for your `blog` blockchain
 	queryClient := types.NewQueryClient(c.Client.Context())
@@ -187,6 +210,79 @@ func (c *CosmosClient) QueryAllHypergridNodes() (*types.QueryAllHypergridNodeRes
 
 	// Print response from querying all the posts
 	log.Print("\n\nAll Hypergrid Nodes:\n\n")
+	log.Println(queryResp)
+	return queryResp, err
+}
+
+func (c *CosmosClient) SettleFeeBill(account cosmosaccount.Account, fromId uint64, endId uint64) (*cosmosclient.Response, error) {
+	address, err := account.Address(COSMOS_ADDRESS_PREFIX)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println("Account: ", address)
+
+	// Define a message to create a grid inbox
+	msg := types.MsgCreateFeeSettlementBill{
+		Creator: address,
+		FromId:  fromId,
+		EndId:   endId,
+	}
+
+	// Broadcast a transaction from account with the message
+	// to create a post store response in txResp
+	txResp, err := c.Client.BroadcastTx(c.Context, account, &msg)
+	if err != nil {
+		log.Fatal(err)
+		return nil, err
+	}
+	// Print response from broadcasting a transaction
+	log.Print("MsgCreateFeeSettlementBill:\n\n")
+	log.Println(txResp)
+
+	_, err1 := c.Client.WaitForTx(c.Context, txResp.TxHash)
+	if err1 != nil {
+		log.Fatal(err1)
+		return nil, err1
+	}
+
+	return &txResp, nil
+}
+
+func (c *CosmosClient) QueryLastFeeSettlementBill() (*types.QueryAllFeeSettlementBillResponse, error) {
+	// Instantiate a query client for your `blog` blockchain
+	queryClient := types.NewQueryClient(c.Client.Context())
+
+	// Query the blockchain using the client's `PostAll` method
+	// to get all posts store all posts in queryResp
+	queryResp, err := queryClient.FeeSettlementBillAll(c.Context, &types.QueryAllFeeSettlementBillRequest{Pagination: &query.PageRequest{
+		Limit:   1,
+		Reverse: true,
+	}})
+	if err != nil {
+		log.Fatal(err)
+		return nil, err
+	}
+
+	// Print response from querying all the posts
+	log.Print("\n\nAll grid tx fee:\n\n")
+	log.Println(queryResp)
+	return queryResp, err
+}
+
+func (c *CosmosClient) QueryGetFeeSettlementBill(_id uint64) (*types.QueryGetFeeSettlementBillResponse, error) {
+	// Instantiate a query client for your `blog` blockchain
+	queryClient := types.NewQueryClient(c.Client.Context())
+
+	// Query the blockchain using the client's `PostAll` method
+	// to get all posts store all posts in queryResp
+	queryResp, err := queryClient.FeeSettlementBill(c.Context, &types.QueryGetFeeSettlementBillRequest{Id: _id})
+	if err != nil {
+		log.Fatal(err)
+		return nil, err
+	}
+
+	// Print response from querying all the posts
+	log.Print("\n\nGet grid tx fee:\n\n")
 	log.Println(queryResp)
 	return queryResp, err
 }
