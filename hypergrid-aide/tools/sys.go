@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 )
 
 const AIDE_CONFIG_FILE = "/home/ubuntu/.hypergrid-ssn/last_slot.txt"
@@ -37,7 +38,11 @@ func GetLastSentSlot() (uint64, error) {
 			fmt.Println("read to fd fail", err)
 			return 0, err
 		}
-		last_sent_slot, err := strconv.ParseUint(string(fd), 10, 64) // 将fd从[]byte转换为string，然后转换为int
+
+		//trim string fd
+		s := strings.Trim(string(fd), "\n")
+
+		last_sent_slot, err := strconv.ParseUint(s, 10, 64) // 将fd从[]byte转换为string，然后转换为int
 		if err != nil {
 			fmt.Println("convert fd to int fail", err)
 			return 0, err

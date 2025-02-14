@@ -193,7 +193,7 @@ func SettleFeeBill(cosmos tools.CosmosClient, account cosmosaccount.Account) {
 	}
 
 	if fromId == 0 && endId == 0 {
-		log.Fatal("fromId or endId is 0")
+		log.Fatal("fromId and endId is 0")
 		return
 	}
 
@@ -222,6 +222,48 @@ func SettleFeeBill(cosmos tools.CosmosClient, account cosmosaccount.Account) {
 
 	log.Print("SendTxFeeSettlement:\n\n")
 	log.Println(res4)
+}
+
+func InitFeeAccounts(cosmos tools.CosmosClient, account cosmosaccount.Account) {
+	res1, err1 := cosmos.QueryAllHypergridNodes()
+	if err1 != nil {
+		log.Fatal(err1)
+	}
+
+	nodes := res1.HypergridNode
+	has_hssn := false
+	has_sonic_grid := false
+	for _, node := range nodes {
+		account_type := uint32(node.Role)
+		if account_type == 4 {
+			continue
+		}
+		//to make sure only one hssn account is created
+		if account_type == 1 {
+			if has_hssn {
+				continue
+			}
+			has_hssn = true
+		}
+		//to make sure only one sonic_grid account is created
+		if account_type == 2 {
+			if has_sonic_grid {
+				continue
+			}
+			has_sonic_grid = true
+		}
+		owner := node.DataAccount
+		if owner == "" {
+			owner = node.Pubkey
+		}
+		res4, err4 := tools.InitializeDataAccount(SOLANA_PRIVATE_KEY, SOLANA_SONIC_GRID_RPC, SonicFeeProgramID, SonicFeeDataAccountID, owner, account_type)
+		if err4 != nil {
+			log.Print(err4)
+		}
+
+		log.Print("InitializeDataAccount:\n\n")
+		log.Println(res4)
+	}
 }
 
 func main() {
@@ -311,6 +353,18 @@ func main() {
 			log.Fatal(err)
 		}
 		SettleFeeBill(*cosmos, account)
+	case "initFeeAccount":
+		cosmos := tools.NewCosmosClient(
+			cosmosclient.WithNodeAddress(COSMOS_RPC_ENDPOINT),
+			cosmosclient.WithAddressPrefix(COSMOS_ADDRESS_PREFIX),
+			cosmosclient.WithHome(COSMOS_HOME),
+			cosmosclient.WithGas(strconv.FormatUint(COSMOS_GAS, 10)),
+		)
+		account, err := cosmos.Account(COSMOS_KEY)
+		if err != nil {
+			log.Fatal(err)
+		}
+		InitFeeAccounts(*cosmos, account)
 	default:
 		fmt.Println("Usage: hypergrid-aide <command>")
 	}

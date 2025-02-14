@@ -169,7 +169,7 @@ func (s *SolanaClient) GetBlocks(start_slot uint64, limit uint64) ([]SolanaBlock
 			blocks = append(blocks, SolanaBlock{
 				Blockhash: resp2.Blockhash.String(),
 				Slot:      block,
-				BlockTime: resp2.BlockTime.Time().Second(),
+				BlockTime: int(resp2.BlockTime.Time().Unix()),
 				Fee:       Fee,
 			})
 		}
@@ -460,5 +460,60 @@ func SendTxFeeSettlement(localPrivateKey string, rpcUrl string, SonicFeeProgramI
 	}
 
 	signers := []solana.PrivateKey{signer}
+	return sendSonicTx(rpcUrl, SonicFeeProgramID, accounts, serializedData, signers)
+}
+
+type InitializedParams struct {
+	Instruction uint32
+	Owner       solana.PublicKey
+	AccountType uint32
+}
+
+// BorshEncode encodes the InstructionData using Borsh
+func (d *InitializedParams) BorshEncode() ([]byte, error) {
+	buf := new(bytes.Buffer)
+	err := binary.Write(buf, binary.LittleEndian, d.Instruction)
+	if err != nil {
+		return nil, err
+	}
+	err = binary.Write(buf, binary.LittleEndian, d.Owner[:])
+	if err != nil {
+		return nil, err
+	}
+	err = binary.Write(buf, binary.LittleEndian, d.AccountType)
+	if err != nil {
+		return nil, err
+	}
+
+	return buf.Bytes(), nil
+}
+
+func InitializeDataAccount(localPrivateKey string, rpcUrl string, SonicFeeProgramID string, SonicFeeDataAccountID string, owner string /*data_account string,*/, account_type uint32) (*solana.Signature, error) {
+	instructionData := InitializedParams{
+		Instruction: 0,
+		Owner:       solana.MustPublicKeyFromBase58(owner),
+		AccountType: account_type,
+	}
+
+	log.Println("instructionData:", instructionData)
+
+	// Serialize to bytes using Borsh
+	serializedData, err := instructionData.BorshEncode()
+	if err != nil {
+		// panic(err)
+		return nil, err
+	}
+
+	accounts := solana.AccountMetaSlice{
+		solana.NewAccountMeta(solana.MustPublicKeyFromBase58(SonicFeeDataAccountID), true, false),
+	}
+
+	signer, err := getLocalPrivateKey(localPrivateKey)
+	if err != nil {
+		// panic(err)
+		return nil, err
+	}
+	signers := []solana.PrivateKey{signer}
+
 	return sendSonicTx(rpcUrl, SonicFeeProgramID, accounts, serializedData, signers)
 }

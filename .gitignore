@@ -8,4 +8,7 @@ release/
 *.log
 *.ign
 hypergrid-aide/main
+hypergrid-aide/.hypergrid-ssn
 hypergrid-aide/hypergrid-aide
+hypergrid-aide/hypergrid-aide.gz
+hypergrid-aide/hypergrid-aide.zip
