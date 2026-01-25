@@ -29,7 +29,7 @@ const logger = winston.createLogger({
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
 const TABLE_NAME = "HypergridStates";
-const HSSN_RPC_DEFAULT = "https://exapi.testnet.hssn.sonic.game";
+const HSSN_RPC_DEFAULT = "https://exapi.mainnet-alpha.hssn.sonic.game";
 
 const PORT = process.env.PORT || 3000;
 const app = express();
